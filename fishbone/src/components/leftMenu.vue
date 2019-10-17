@@ -5,10 +5,10 @@
         <el-row type="flex" justify="start" align="middle">
           <el-col :span="10"><div><i class="el-icon-fork-spoon"></i></div></el-col>
         </el-row>
-        <el-menu class="main-menu" default-active="1" background-color="rgb(244,244,244)" text-color="#2c3e50" :router="true">
-          <el-menu-item index="/hello"><i class="el-icon-s-home"></i>首页</el-menu-item>
-          <el-menu-item index="/hello"><i class="el-icon-s-order"></i>任务</el-menu-item>
-          <el-menu-item index="3"><i class="el-icon-s-cooperation"></i>项目</el-menu-item>
+        <el-menu class="main-menu" default-active="/home" background-color="rgb(244,244,244)" text-color="#2c3e50" :router="true">
+          <el-menu-item index="/home"><i class="el-icon-s-home"></i>首页</el-menu-item>
+          <el-menu-item index="/task"><i class="el-icon-s-order"></i>任务</el-menu-item>
+          <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目</el-menu-item>
           <el-menu-item index="4"><i class="el-icon-date"></i>日程</el-menu-item>
         </el-menu>
         <el-divider class="menu-divider"></el-divider>
@@ -79,8 +79,8 @@ export default {
     width: 89.32%;
     height: 0;
     margin: 0 0 0 10.67%;
-    border-top: 1px solid #e9e9e9;
-    border-bottom: 1px solid #fff;
+    border-top: 1.5px solid #e9e9e9;
+    border-bottom: 1.5px solid #fff;
 }
 
 .el-footer {
