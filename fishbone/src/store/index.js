@@ -6,7 +6,13 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        count: 10
+        taskListResData: []
     }
+    // mutations: {
+    //     setTaskListResData(state,resData) {
+    //         state.taskListResData = resData;
+    //         console.log(state.taskListResData.count);
+    //     }
+    // }
 });
 

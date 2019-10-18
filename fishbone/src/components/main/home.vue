@@ -14,7 +14,7 @@
     </el-col>
     <!-- 项目 -->
     <el-col :span="6" class="home-project-list">
-      <header>项目 [ {{projectList.count}} ]</header>
+      <header>项目 [ {{projectCount}} ]</header>
       <el-menu background-color="#fff" text-color="#2c3e50">
         <el-menu-item index="1" v-for="item in projectList">
           <div class="first-line">
@@ -22,7 +22,7 @@
             <span>{{item.percent}}</span>
           </div>
           <div class="second-line">
-            <span>{{item.manager.nick_name}}</span>
+            <span class="baseColor">{{item.manager.nick_name}}</span>
             <span :class="isOverDue(item.plan_end_date) ? 'baseColor' : 'redColor'">{{item.plan_end_date}}</span>
           </div>
         </el-menu-item>
@@ -56,6 +56,7 @@ export default {
       }
     }).then((res) => {
       let resData = res.data;
+      sessionStorage.setItem('taskResList',resData); // 存数据到sessionStorage里面
       this.taskCount = resData.count;
       this.taskList = resData.list;
     });
@@ -69,6 +70,7 @@ export default {
       }
     }).then((res) => {
       let resData = res.data;
+      sessionStorage.setItem('projectResList',resData);
       this.projectCount = resData.count;
       this.projectList = resData.list;
     });
@@ -81,6 +83,7 @@ export default {
       } else {
         state = false;
       }
+      console.log(time,state);
       return state;
     }
   }
@@ -133,12 +136,6 @@ header {
   position: relative;
   top: -15px;
 }
-.baseColor {
-  color: #909090;
-}
-.redColor {
-  color: red;
-}
 .second-line {
   position: absolute;
   bottom: -10px;
@@ -151,9 +148,14 @@ header {
 }
 .second-line span {
   font-size: 12px;
-  color: #909090;
 }
 .el-menu-item:hover, .el-menu-item.is-active{ /* 这里这个样式，.el-menu-item.is-active，用来设置菜单被选中时候的颜色 */ 
   background-color: rgb(241,248,254) !important;
+}
+.baseColor {
+  color: #909090;
+}
+.redColor {
+  color: red;
 }
 </style>
