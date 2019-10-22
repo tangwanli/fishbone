@@ -1,9 +1,8 @@
 <template>
   <el-container id="DetailTask">
     <el-header height="26px">
-      <searchBox class="searchBox" :active="activeName"></searchBox>
       <el-row class="task-header" type="flex" justify="space-between">
-        <el-col :span="21" class="task-title">G028 看板这里来第四个任务</el-col>
+        <el-col :span="21" class="task-title">{{taskInfo.code}} {{taskInfo.task_name}}</el-col>
         <el-col :span="3" class="task-btn"><el-button size="mini" type="danger" :round="true" plain>删除任务</el-button><i class="el-icon-close"></i></el-col>
       </el-row>
     </el-header>
@@ -11,22 +10,25 @@
     <el-main class='task-main'>
       <div class="main-header">
         <el-row type="flex" justify="flex-start">
-          <el-col :span="6">负责人：我</el-col>
-          <el-col :span="18">抄送人：没有</el-col>
+          <el-col :span="6">
+            负责人：{{taskInfo.manager.nick_name}}
+            <searchBox :taskInfo="taskInfo" aimPosition="manager" class="searchBox" :active="activeName"></searchBox>
+          </el-col>
+          <el-col :span="18">抄送人：没有<searchBox v-if="false" :taskInfo="taskInfo" aimPosition="cc_member" class="searchBox" :active="activeName"></searchBox></el-col>
         </el-row>
         <el-row type="flex" justify="flex-start" class="second-row">
           <el-col>时间：2016-12-27至2016-12-27</el-col>
           <el-col>优先级：普通</el-col>
-          <el-col>项目：这里来一个项目</el-col>
+          <el-col>项目：这里来一个项目<searchBox v-if="false" :taskInfo="taskInfo" aimPosition="project"  class="searchBox proSearchBox" :active="activeName"></searchBox></el-col>
         </el-row>
         <el-row type="flex" justify="flex-start">
-          <el-col>创建：这里就是这个创建的人</el-col>
+          <el-col>创建：{{taskInfo.creator.nick_name}}</el-col>
         </el-row>
       </div>
 
       <div class="main-content">
         <el-row type="flex" justify="space-between">
-          <el-col :span="22">这里是显示的所有内容，这个内容就有这么长。这里是显示的所有内容，这个内容就有这么长。这里是显示的所有内容，这个内容就有这么长。这里是显示的所有内容，这个内容就有这么长。这里是显示的所有内容，这个内容就有这么长。</el-col>
+          <el-col :span="22">{{taskInfo.content}}</el-col>
           <el-col :span="2"><i class="el-icon-edit-outline"></i></el-col>
         </el-row>
       </div>
@@ -38,10 +40,10 @@
         <el-row type="flex" justify="space-between" class="task-info">
           <el-col :span="21">
             <span class="baseColor">任务执行</span>
-            <span class="baseColor">（进行中）</span>
+            <span class="baseColor">（{{taskInfo.status}}）</span>
             <br>
-            <span class="baseColor">我就是这个项目经理名字</span>
-            <span class="redColor">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;完成时间：10-19 16:00</span>
+            <span class="baseColor">{{taskInfo.manager.nick_name}}</span>
+            <span class="redColor">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{taskInfo.plan_end_date}}</span>
           </el-col>
           <el-col :span="3">
             <!-- <el-button type="primary" round size="mini">开始解决</el-button> -->
@@ -95,11 +97,22 @@ export default {
       percentList: ['0%','10%','20%','30%','40%','50%','60%','70%','80%','90%','100%'],
       initValue: '',
       activeName: 'first',
-      input: ''
+      input: '',
+      taskInfo: {}
     }
   },
   created() {
-      console.log('dsadas',this.$route.query);
+    let resData = JSON.parse(sessionStorage.getItem('taskResList')),
+        taskCount = resData.count,
+        taskList = resData.list,
+        taskId = this.$route.params.id;
+    taskList.find((value,index,arr) => { // 找到对应的任务
+      if (value.task_id == taskId) {
+        this.taskInfo = value;
+        return true;
+      }
+    });
+    console.log(this.taskInfo);
   },
   methods: {
     handleClick(tab, event) {
@@ -114,11 +127,20 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/* 设置searchBox的样式，主要是进行定位操作 */
 .searchBox {
   position: absolute;
-  left: 0;
-  top: 0;
-  background: red;
+  top: 3px;
+  left: 66px;
+  width: 260px;
+  height: 410px;
+  z-index: 999;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: rgb(255,255,255);
+}
+.proSearchBox {
+  left: -90%;
 }
 #DetailTask {
   position: absolute;
@@ -168,6 +190,7 @@ export default {
   padding-top: 0;
 }
 .main-header .el-col {
+  position: relative;
   height: 34px;
   line-height: 34px;
   border: 1px solid rgb(213, 213, 213);

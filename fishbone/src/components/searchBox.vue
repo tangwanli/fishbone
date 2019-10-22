@@ -1,7 +1,28 @@
 <template>
-  <div>
-      the content is this {{active}}
-  </div>
+  <el-container id="searchBox">
+    <el-header height="110px">
+      <span>已选择：</span>
+      <el-tag v-for="item in tagArr" closable size="mini" @close="closeTag(item)">{{item}}</el-tag>
+    </el-header>
+
+    <el-main>
+      <el-input @blur="searchInfo" type="text" placeholder="请输入内容" v-model="input" size="mini" maxlength="9" show-word-limit>
+        <template slot="prefix">
+          <i class="el-icon-search"></i>
+        </template>
+      </el-input>
+      <el-row class="info-list">
+        <el-col :class="isSelect(item) ? 'selectColor' : 'normalColor'" :span="24" v-for="item in infoList" @click="">{{item.nick_name}}</el-col>
+      </el-row>
+    </el-main>
+<!-- 现在要做的就是判断这些的选中和添加标签了 -->
+    <el-footer>
+      <el-button-group>
+        <el-button type="primary" size="mini" round plain>确定</el-button>
+        <el-button type="primary" size="mini" round plain>取消</el-button>
+      </el-button-group>
+    </el-footer>
+  </el-container>
 </template>
 
 <script>
@@ -9,18 +30,177 @@ export default {
   name: 'searchBox',
   data () {
     return {
-        msg: 'dsa'
+        tagArr: [],
+        input: '',
+        infoList: []
     }
   },
-  props: ['active'],
-  created() {
-      
+  props: ['aimPosition','taskInfo'], // 这里这个aimPosition和taskInfo。taskInfo为传过来的当前任务的所有信息，根据这个信息来显示选择了哪些。
+  created() {   
+    this.initTag();                  // aimPosition为一个定位。即，当前的已选择是选择的哪一个。
+    this.initList(); // 初始化所有数据
   },
   methods: {
+    closeTag(item) { // 关闭标签，触发的事件
+      console.log(item);
+      let index = this.tagArr.indexOf(item);
+      this.tagArr.splice(index,1);
+    },
+    isSelect(item) { // 判断列表的哪个项是被选中的，改变它的样式
+      let res = this.tagArr.find((value,index,arr) => {
+        if (value == item) {
+          return true;
+        }
+      });
+      return res ? true : false;
+    },
+    initTag() {
+      if (this.aimPosition == 'manager') { // 点开的为负责人
+        this.tagArr.push(this.taskInfo.manager.nick_name);
+      }
+      if (this.aimPosition == 'cc_member') { // 点开的为抄送人
+        this.taskInfo.cc_member.forEach((value, index, arr) => {
+          this.tagArr.push(value.nick_name);
+        });
+      }
+      if (this.aimPosition == 'project') { // 点开的为项目
+        this.tagArr.push(this.taskInfo.project.project_name);
+      }
+    },
+    initList() {
+        // 显示已选择样式
+      if (this.aimPosition == 'manager') { // 点开的为负责人\
+        this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/member_list.json', { 
+        }).then((res) => {
+          let resData = res.data;
+          this.infoList = resData.list;
+        });
+      }
+      if (this.aimPosition == 'cc_member') { // 点开的为抄送人\
+        this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/member_list.json', { 
+        }).then((res) => {
+          let resData = res.data;
+          this.infoList = resData.list;
+        });
+      }
+      if (this.aimPosition == 'project') { // 点开的为项目\
+        this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/project_list.json', { 
+        }).then((res) => {
+          let resData = res.data;
+          this.infoList = resData.list.map((value,index,arr) => { // 将value.project_name赋值给value.nick_name；为了实现上面的数据统一
+            value.nick_name = value.project_name;
+            return value;
+          });;
+        });
+      }
+    },
+    searchInfo(ev) { // 搜索事件
+      if (this.input != '' || this.input != null) {
+        this.initList();
+      } else {
+        if (this.aimPosition == 'manager') { // 点开的为负责人
+          this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/member_list.json', { 
+            params: {
+              member_name: this.input
+            }
+          }).then((res) => {
+            let resData = res.data;
+            this.infoList = resData.list;
+            console.log(this.infoList);
+          });
+        }
+        if (this.aimPosition == 'cc_member') { // 点开的为抄送人
+          this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/member_list.json', { 
+            params: {
+              member_name: this.input
+            }
+          }).then((res) => {
+            let resData = res.data;
+            this.infoList = resData.list;
+          });
+        }
+        if (this.aimPosition == 'project') { // 点开的为项目
+          this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/project_list.json', { 
+            params: {
+              project_name: this.input
+            }
+          }).then((res) => {
+            let resData = res.data;
+            this.infoList = resData.list.map((value,index,arr) => { // 将value.project_name赋值给value.nick_name；为了实现上面的数据统一
+              value.nick_name = value.project_name;
+              return value;
+            });;
+          });
+        }
+      }
+    }
+
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.el-header {
+  overflow: auto;
+  border-bottom: 1px dotted #e9e9e9;
+  white-space: normal;
+}
+.el-header span:nth-of-type(1) {
+  margin-left: -16px;
+  font-size: 12px;
+  color: rgb(103, 167, 246);
+}
+.el-main {
+  overflow: auto;
+  padding: 0;
+  border-bottom: 1px dotted #e9e9e9;
+}
+.el-input {
+  width: 80%;
+}
+/* 查出来的所有信息 */
+.info-list {
+  overflow: auto;
+}
+.info-list .el-col {
+  height: 35px;
+  line-height: 35px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  cursor: pointer;
+}
+.info-list .el-col:hover {
+  background: rgb(234,245,255);
+}
+.selectColor {
+  background: rgb(234,245,255);
+}
+.normalColor {
+  background: #fff;
+}
+.el-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+</style>
+<style>
+#searchBox .el-tag .el-icon-close {
+  text-indent: 0;
+  font-size: 12px;
+}
+#searchBox .el-tag--mini {
+  padding-left: 0;
+}
+#searchBox .el-input__inner {
+  text-indent: 10px;
+  text-align: left;
+  font-size: 12px;
+}
+#searchBox .el-input__count-inner {
+  position: relative;
+  left: 15px;
+}
 </style>

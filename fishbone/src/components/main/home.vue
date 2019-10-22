@@ -56,7 +56,7 @@ export default {
       }
     }).then((res) => {
       let resData = res.data;
-      sessionStorage.setItem('taskResList',resData); // 存数据到sessionStorage里面
+      sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
       this.taskCount = resData.count;
       this.taskList = resData.list;
     });
