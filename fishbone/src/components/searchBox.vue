@@ -2,7 +2,7 @@
   <el-container id="searchBox">
     <el-header height="110px">
       <span>已选择：</span>
-      <el-tag v-for="item in tagArr" closable size="mini" @close="closeTag(item)">{{item}}</el-tag>
+      <el-tag v-for="tagName in tagArr" closable size="mini" @close="closeTag(tagName)">{{tagName}}</el-tag>
     </el-header>
 
     <el-main>
@@ -12,14 +12,14 @@
         </template>
       </el-input>
       <el-row class="info-list">
-        <el-col :class="isSelect(item) ? 'selectColor' : 'normalColor'" :span="24" v-for="item in infoList" @click="">{{item.nick_name}}</el-col>
+        <el-col :class="isSelect(item.nick_name) ? 'selectColor' : 'normalColor'" :span="24" v-for="item in infoList"  @click.native="selectList(item.nick_name)">{{item.nick_name}}</el-col>
       </el-row>
     </el-main>
 <!-- 现在要做的就是判断这些的选中和添加标签了 -->
     <el-footer>
       <el-button-group>
-        <el-button type="primary" size="mini" round plain>确定</el-button>
-        <el-button type="primary" size="mini" round plain>取消</el-button>
+        <el-button type="primary" size="mini" round plain @click.native="determine">确定</el-button>
+        <el-button type="primary" size="mini" round plain @click.native="cancel">取消</el-button>
       </el-button-group>
     </el-footer>
   </el-container>
@@ -35,36 +35,40 @@ export default {
         infoList: []
     }
   },
-  props: ['aimPosition','taskInfo'], // 这里这个aimPosition和taskInfo。taskInfo为传过来的当前任务的所有信息，根据这个信息来显示选择了哪些。
+  props: ['aimPosition','tag2'], // 这里这个aimPosition和tag。tag未传过来的标签，根据这个信息来显示选择了哪些。
   created() {   
     this.initTag();                  // aimPosition为一个定位。即，当前的已选择是选择的哪一个。
     this.initList(); // 初始化所有数据
+    console.log('the create');
   },
   methods: {
-    closeTag(item) { // 关闭标签，触发的事件
-      console.log(item);
-      let index = this.tagArr.indexOf(item);
+    closeTag(tagName) { // 关闭标签，触发的事件
+      let index = this.tagArr.indexOf(tagName);
       this.tagArr.splice(index,1);
     },
-    isSelect(item) { // 判断列表的哪个项是被选中的，改变它的样式
+    isSelect(tagName) { // 判断列表的哪个项是被选中的，改变它的样式
       let res = this.tagArr.find((value,index,arr) => {
-        if (value == item) {
+        if (value == tagName) {
           return true;
         }
       });
       return res ? true : false;
     },
+    selectList(tagName) { // 点击之后把对应的名字加入tagArr，并且改变颜色
+      if (this.isSelect(tagName)) { // 不管什么情况，点击被选中了的，都会直接被取消
+        let index = this.tagArr.indexOf(tagName);
+        this.tagArr.splice(index,1);
+      } else {
+        if (this.aimPosition == 'cc_member' || this.tagArr.length == 0) { // cc_member就可以选择多个人，其它就只能选择一个人
+          this.tagArr.push(tagName);
+        }
+      }
+    },
     initTag() {
-      if (this.aimPosition == 'manager') { // 点开的为负责人
-        this.tagArr.push(this.taskInfo.manager.nick_name);
-      }
-      if (this.aimPosition == 'cc_member') { // 点开的为抄送人
-        this.taskInfo.cc_member.forEach((value, index, arr) => {
-          this.tagArr.push(value.nick_name);
-        });
-      }
-      if (this.aimPosition == 'project') { // 点开的为项目
-        this.tagArr.push(this.taskInfo.project.project_name);
+      if (this.tag2[0] != '未设置') {
+        this.tagArr = JSON.parse(JSON.stringify(this.tag2));
+      } else {
+        this.tagArr = [];
       }
     },
     initList() {
@@ -133,6 +137,13 @@ export default {
           });
         }
       }
+    },
+    determine() {
+      this.$emit("changeSearch",this.aimPosition, this.tagArr);
+      this.cancel();
+    },
+    cancel() {
+      this.$emit("cancelBox");
     }
 
   }
