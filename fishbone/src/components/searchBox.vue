@@ -140,6 +140,7 @@ export default {
     },
     determine() {
       this.$emit("changeSearch",this.aimPosition, this.tagArr);
+      console.log(this.tagArr);
       this.cancel();
     },
     cancel() {

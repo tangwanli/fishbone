@@ -7,6 +7,7 @@
       </el-row>
     </el-header>
 
+    <!-- 整个任务的主内容区 -->
     <el-main class='task-main'>
       <div class="main-header">
         <el-row type="flex" justify="flex-start">
@@ -15,13 +16,22 @@
             <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" aimPosition="manager" class="searchBox" :active="activeName" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
           <el-col :span="18">抄送人：
-            <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeTag(tagName)"  @changeSearch="changeSearchInfo">{{tagName}}</el-tag>
-            <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" :active="activeName"></searchBox></el-col>
+            <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeTag(tagName)">{{tagName}}</el-tag>
+            <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" :active="activeName" @changeSearch="changeSearchInfo"></searchBox></el-col>
         </el-row>
         <el-row type="flex" justify="flex-start" class="second-row">
-          <el-col>时间：2016-12-27至2016-12-27</el-col>
-          <el-col>优先级：普通</el-col>
-          <el-col>项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0]}}</span>
+          <el-col :span="12" class="taskDate">时间：
+            <el-date-picker v-model="plan_start_date" @change="changeStartDate" type="date" size="mini" placeholder="选择日期" :clearable="false" :editable="false"></el-date-picker>
+            至
+            <el-date-picker v-model="plan_end_date" @change="changeEndDate" type="date" size="mini" placeholder="选择日期" :clearable="false" :editable="false"></el-date-picker>
+          </el-col>
+          <el-col :span="6">
+            优先级：
+            <el-select v-model="priorityInitValue" placeholder="普通" size="mini" @change="changePriority">
+              <el-option v-for="priority in priorityList" :value="priority" :label="priority"></el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="6">项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0]}}</span>
             <searchBox @cancelBox="cancelBox" v-if="isProShowBox" :tag2="projectName" aimPosition="project"  class="searchBox proSearchBox" :active="activeName" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
@@ -32,8 +42,10 @@
 
       <div class="main-content">
         <el-row type="flex" justify="space-between">
-          <el-col :span="22">{{taskInfo.content}}</el-col>
-          <el-col :span="2"><i class="el-icon-edit-outline"></i></el-col>
+          <el-col :span="22">
+            <el-input type="textarea" @blur="changeContent" placeholder="请输入内容:" v-model="content" :autosize="{maxRows: 7}" maxlength="1000" show-word-limit :disabled="isDisableModifyContent"></el-input>
+          </el-col>
+          <el-col :span="2"><i class="el-icon-edit-outline" @click="isDisableModifyContent = (isDisableModifyContent ? false : true)"></i></el-col>
         </el-row>
       </div>
 
@@ -44,36 +56,37 @@
         <el-row type="flex" justify="space-between" class="task-info">
           <el-col :span="21">
             <span class="baseColor">任务执行</span>
-            <span class="baseColor">（{{taskInfo.status}}）</span>
+            <span class="baseColor">（{{taskStatus}}）</span>
             <br>
-            <span class="baseColor">{{managerName[0]}}</span>
-            <span class="redColor">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{taskInfo.plan_end_date}}</span>
+            <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">{{managerName[0]}}</span>
+            <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{plan_end_date}}</span>
           </el-col>
           <el-col :span="3">
-            <!-- <el-button type="primary" round size="mini">开始解决</el-button> -->
-            <el-select v-model="initValue" placeholder="0%" size="mini">
-              <el-option v-for="item in percentList" :value="item" :label="item"></el-option>
+            <el-button @click="changeTaskStatus" v-if="taskStatus == 'waitting'" type="primary" round size="mini">开始解决</el-button>
+            <el-select @change="changeTaskProgress" v-if="taskStatus == 'running'" v-model="taskProgressInitValue" placeholder="0%" size="mini">
+              <el-option v-for="percent in percentList" :value="percent" :label="percent"></el-option>
             </el-select>
-            <!-- <el-button round size="mini" disabled>已完成</el-button> -->
+            <el-button v-if="taskStatus == 'finish'" round size="mini" disabled>已完成</el-button>
           </el-col>
         </el-row>
       </div>
     </el-main>
 
+    <!-- 整个任务的footer -->
     <el-footer height="190px">
       <el-tabs tab-position="left" v-model="activeName">
         <el-tab-pane label="任务进展" name="first">
           <el-timeline>
-            <el-timeline-item type="danger" timestamp="2018/4/12" placement="top" size="large" icon="el-icon-info">
+            <el-timeline-item v-for="comment in commentArr" type="danger" :timestamp="comment.comment_times" placement="top" size="large" icon="el-icon-info">
               <el-card>
                 <p>
-                  <span>王小虎 :</span>
+                  <span>{{comment.nick_name}} :</span>
                   <br>
-                  <span>dsadsadsadsad</span>
+                  <span>{{comment.content}}</span>
                 </p>
               </el-card>
             </el-timeline-item>
-            <el-timeline-item type="danger" timestamp="2018/4/15" placement="top" size="large" icon="el-icon-info">
+            <!-- <el-timeline-item type="danger" timestamp="2018/4/15" placement="top" size="large" icon="el-icon-info">
               <el-card>
                 <p>
                   <span>王小虎ds :</span>
@@ -81,10 +94,10 @@
                   <span>dsad我sadsadsad</span>
                 </p>
               </el-card>
-            </el-timeline-item>
+            </el-timeline-item> -->
           </el-timeline>
         </el-tab-pane>
-        <el-tab-pane label="操作记录" name="second">配置管理2</el-tab-pane>
+        <el-tab-pane label="操作记录" name="second">这个操作记录已经合在上面任务记录里面了！！！！大佬们看着玩吧！！！！</el-tab-pane>
       </el-tabs>
       <el-input class="task-com" size="medium" type="text" placeholder="请大佬写下你的评论吧！" v-model="input" clearable show-word-limit maxlength="1000"></el-input>
     </el-footer>
@@ -98,17 +111,27 @@ export default {
   name: 'DetailTask',
   data () {
     return {
-      percentList: ['0%','10%','20%','30%','40%','50%','60%','70%','80%','90%','100%'],
-      initValue: '',
-      activeName: 'first',
-      input: '',
-      taskInfo: {},
+      url: '',
       managerName: ['未设置'],
       projectName: ['未设置'],
       ccMembers: ['未设置'],
       isManagerShowBox: false,
       isCcShowBox: false,
-      isProShowBox: false
+      isProShowBox: false,
+      plan_start_date: '',
+      plan_end_date: '',
+      priorityList: ['普通','重要','紧急','重要紧急'],
+      priorityInitValue: '', // 任务优先值处的默认值
+      content: '',
+      isDisableModifyContent: true, // 主内容区是否可修改
+      taskStatus: 'running',
+      percentList: ['0%','10%','20%','30%','40%','50%','60%','70%','80%','90%','100%'],
+      taskProgressInitValue: '', // 任务进度处的默认值
+      activeName: 'first', // 这个是任务最下面标签的默认选中
+      commentArr: [],
+      input: '',
+      taskInfo: {},
+      task_id: '',
     }
   },
   created() {
@@ -119,24 +142,63 @@ export default {
     taskList.find((value,index,arr) => { // 找到对应的任务
       if (value.task_id == taskId) {
         this.taskInfo = value;
-        this.saveTagArr(); // 这个只执行一次，即组件加载的时候，弄一个默认的
+        this.initData();
+        this.initComment();
         return true;
       }
     });
-    console.log(this.taskInfo);
   },
   methods: {
+    initData() {
+      this.saveTagArr(); // 这个只执行一次，即组件加载的时候，弄一个默认的
+      this.plan_start_date = this.taskInfo.plan_start_date;
+      this.plan_end_date = this.taskInfo.plan_end_date;
+      this.priorityInitValue = this.taskInfo.priority;
+      this.content = this.taskInfo.content;
+      // this.taskStatus = this.taskInfo.status;
+      this.taskStatus = 'waitting';
+      this.task_id = this.taskInfo.task_id;
+      this.url = '/task/modify.json/' + this.task_id;
+    },
+    initComment() { // 初始化评论
+      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
+        params: {
+          subject_id: this.task_id,
+          limit: 20,
+          start: 0,
+          type: 'project'
+        }
+      }).then((res) => {
+        let resData = res.data;
+        this.commentArr = resData.comment.map((value,index,arr) => {
+          let temp = {
+            nick_name: value.creator.nick_name,
+            content: value.content,
+            comment_times: value.comment_times
+          };
+          return temp;
+        });
+      });
+    },
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
       if (aimPosition == 'manager') { // 点开的为负责人\
           this.managerName = tagArr.length ? tagArr : ['未设置'];
+          this.$ajax.post(this.url, { // 修改任务负责人
+            manager_name: this.managerName[0] == '未设置' ? '' : this.managerName[0]
+          });
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人\
           this.ccMembers = tagArr.length ? tagArr : ['未设置'];
+          this.$ajax.post(this.url, { // 修改任务负责人
+            cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+          });
       }
       if (aimPosition == 'project') { 
           this.projectName = tagArr.length ? tagArr : ['未设置'];
+          this.$ajax.post(this.url, { // 修改任务负责人
+            project_name: this.projectName[0] == '未设置' ? '' : this.projectName[0]
+          });
       }
-      console.log(tagArr);
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
       let managerName2 = this.taskInfo.manager.nick_name;
@@ -180,6 +242,57 @@ export default {
       this.ccMembers.splice(index,1);
       if (this.ccMembers.length == 0) {
         this.ccMembers.push('未设置');
+      }
+      this.$ajax.post(this.url, { // 修改任务负责人
+        cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+      });
+    },
+    changeStartDate(date) { // 修改任务的开始日期
+      let resDate = this.formatDate(new Date(date));
+      this.$ajax.post(this.url, { // 修改任务负责人
+        plan_start_date: resDate
+      });
+    },
+    changeEndDate(date) { // 修改任务的结束日期
+      let resDate = this.formatDate(new Date(date));
+      this.$ajax.post(this.url, {
+        plan_end_date: resDate
+      });
+    },
+    formatDate(date) {
+      let year = date.getFullYear(),
+          month = date.getMonth(),
+          day = date.getDate();
+      return year + '-' + month + '-' + day + ' 00:00:00';
+    },
+    changePriority(value) { // 修改任务优先级
+      this.$ajax.post(this.url, {
+        priority: value
+      });
+    },
+    changeContent() { // 修改任务内容
+      this.$ajax.post(this.url, {
+        content: this.content
+      });
+      this.isDisableModifyContent = true;
+    },
+    changeTaskStatus() { // 改变任务的状态，从开始准备到进行中
+      this.taskStatus = 'running';
+      this.$ajax.post(this.url, {
+        status: 'running'
+      });
+    },
+    changeTaskProgress(value) { // 改变任务进度
+      if (value == '100%') {
+        this.taskStatus = 'finish';
+        this.$ajax.post(this.url, {
+          progress_percent: value,
+          status: 'finish'
+        });
+      } else {
+        this.$ajax.post(this.url, {
+          progress_percent: value
+        });
       }
     }
 
@@ -250,10 +363,11 @@ export default {
   box-shadow: 0 0 3px red;
   color: red;
 }
-/* main */
+/* 主内容区 */
 .task-main {
   padding-top: 0;
 }
+/* 主内容区的头部 */
 .main-header .el-col {
   position: relative;
   height: 34px;
@@ -288,6 +402,11 @@ export default {
 .main-header .el-row:nth-of-type(2) .el-col:nth-of-type(2) {
   border-right: none;
 }
+.main-header .el-select {
+  width: 50%;
+  text-indent: 0;
+}
+/* 主内容区的内容 */
 .main-content {
   height: 185px;
   padding:15px 10px 10px 20px;
@@ -355,10 +474,11 @@ export default {
 
 <style>
 /* 所有组件里面共用的样式。用来修改scope组件限制了作用域的组件默认样式 */
-.task-com input {
+#DetailTask .task-com input {
   font-size: 14px;
   text-align: left;
 }
+/* 最下面评论样式修改 */
 #DetailTask #tab-first, #DetailTask #tab-second {
   padding-left: 0;
 }
@@ -381,21 +501,43 @@ export default {
 }
 
 
-.main-header .el-tag .el-icon-close {
+/* 抄送人标签样式修改 */
+#DetailTask .main-header .el-tag .el-icon-close {
   text-indent: 0;
   font-size: 12px;
 }
-.main-header .el-tag--mini {
+#DetailTask .main-header .el-tag--mini {
   padding-left: 0;
 }
-.main-header .el-input__inner {
+#DetailTask .main-header .el-input__inner {
   text-indent: 10px;
   text-align: left;
   font-size: 12px;
 }
-.main-header .el-input__count-inner {
+#DetailTask .main-header .el-input__count-inner {
   position: relative;
   left: 15px;
 }
 
+/* 日期选择器那里样式修改 */
+#DetailTask .taskDate .el-date-editor.el-input {
+  width: 40%;
+  text-indent: 0;
+}
+
+/* 优先级选择框修改 */
+#DetailTask .main-header .el-select .el-input__suffix{
+  display: none;
+}
+#DetailTask .main-header .el-select .el-input__inner{
+  padding-right: 10px;
+  padding-left: 0;
+  text-align: center;
+}
+
+/* 主内容区，输入框样式修改 */
+#DetailTask .main-content .el-textarea__inner {
+  text-align: left;
+  height: 100%;
+}
 </style>
