@@ -28,7 +28,12 @@ export default new Router({
     {
       path: '/task',
       name: 'task',
-      component: task
+      component: task,
+      children: [{
+        path: '/task/:id',
+        name: 'DetailTask',
+        component: DetailTask
+      }]
     },
     {
       path: '/project',

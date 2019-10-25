@@ -3,7 +3,7 @@
     <el-header height="26px">
       <el-row class="task-header" type="flex" justify="space-between">
         <el-col :span="21" class="task-title">{{taskInfo.code}} {{taskInfo.task_name}}</el-col>
-        <el-col :span="3" class="task-btn"><el-button size="mini" type="danger" :round="true" plain>删除任务</el-button><i class="el-icon-close"></i></el-col>
+        <el-col :span="3" class="task-btn"><el-button @click="deleteTask" size="mini" type="danger" :round="true" plain>删除任务</el-button><i @click="closeTask" class="el-icon-close"></i></el-col>
       </el-row>
     </el-header>
 
@@ -99,7 +99,7 @@
         </el-tab-pane>
         <el-tab-pane label="操作记录" name="second">这个操作记录已经合在上面任务记录里面了！！！！大佬们看着玩吧！！！！</el-tab-pane>
       </el-tabs>
-      <el-input class="task-com" size="medium" type="text" placeholder="请大佬写下你的评论吧！" v-model="input" clearable show-word-limit maxlength="1000"></el-input>
+      <el-input @blur="subComment" class="task-com" size="medium" type="text" placeholder="请大佬写下你的评论吧！" v-model="commentContent" clearable show-word-limit maxlength="1000"></el-input>
     </el-footer>
   </el-container>
 </template>
@@ -129,11 +129,14 @@ export default {
       taskProgressInitValue: '', // 任务进度处的默认值
       activeName: 'first', // 这个是任务最下面标签的默认选中
       commentArr: [],
-      input: '',
+      commentContent: '',
       taskInfo: {},
       task_id: '',
     }
   },
+  // beforeRouteUpdate(to, from, next) {  // 在路由进入这个组件之前调用。拦截所有非直接路径(比如已经打开了一个组件，再通过路由再打开这个组件)进来的请求，先跳转到直接路径，再进入
+  //   console.log('go', to, from,this.$route.path);
+  // },
   created() {
     let resData = JSON.parse(sessionStorage.getItem('taskResList')),
         taskCount = resData.count,
@@ -147,6 +150,7 @@ export default {
         return true;
       }
     });
+    console.log('????????????????????');
   },
   methods: {
     initData() {
@@ -164,8 +168,6 @@ export default {
       this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
         params: {
           subject_id: this.task_id,
-          limit: 20,
-          start: 0,
           type: 'project'
         }
       }).then((res) => {
@@ -206,7 +208,6 @@ export default {
       let ccMembers2 = this.taskInfo.cc_member.map((value,index,arr) => {
         return value.nick_name;
       });
-      console.log(this.taskInfo);
       if (managerName2) {
         let temp = [];
         temp.push(managerName2);
@@ -262,8 +263,12 @@ export default {
     formatDate(date) {
       let year = date.getFullYear(),
           month = date.getMonth(),
-          day = date.getDate();
-      return year + '-' + month + '-' + day + ' 00:00:00';
+          day = date.getDate(),
+          hour = date.getHours(),
+          minute = date.getMinutes() < 10 ? ('0' + date.getMinutes()) : date.getMinutes(),
+          second = date.getSeconds() < 10 ? ('0' + date.getSeconds()) : date.getSeconds();
+      return year + '-' + month + '-' + day  + ' ' + hour + ':' + minute + ':' + second;
+      // ' 00:00:00'
     },
     changePriority(value) { // 修改任务优先级
       this.$ajax.post(this.url, {
@@ -294,6 +299,27 @@ export default {
           progress_percent: value
         });
       }
+    },
+    subComment() { // 提交评论
+      let temp = {
+          nick_name: 'this is the username',       
+          content: this.commentContent,
+          comment_times: this.formatDate(new Date())
+      };
+      this.commentArr.push(temp);
+      this.$ajax.post(this.url, {
+          content: this.commentContent,
+          type: 'task'
+      });
+      this.commentContent = '';
+    },
+    closeTask() { // 关闭任务
+      let path = this.$route.path.replace('/' + this.$route.params.id, '');
+      this.$router.push(path);
+    },
+    deleteTask() { // 删除任务
+      this.closeTask();
+      this.$ajax.delete(this.url);
     }
 
   },

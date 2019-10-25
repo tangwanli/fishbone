@@ -4,7 +4,7 @@
     <el-col :span="6" class="home-task-list">
       <header>待办 [ {{taskCount}} ]</header>
       <el-menu background-color="#fff" text-color="#2c3e50" :router="true">
-        <el-menu-item :index="'/home/' + item.task_id" v-for="item in taskList">
+        <el-menu-item @click="reload" :index="'/home/' + item.task_id" v-for="item in taskList">
           <div class="first-line">
             <span>{{item.task_name}}</span>
             <span :class="isOverDue(item.plan_end_date) ? 'baseColor' : 'redColor'">{{item.plan_end_date}}</span>
@@ -29,7 +29,7 @@
       </el-menu>
     </el-col>
     
-    <router-view/>
+    <router-view v-if="isRouterAlive"/>
   </el-row>
 </template>
 
@@ -41,7 +41,8 @@ export default {
       taskCount: 1,
       taskList: [],
       projectCount: 1,
-      projectList: []
+      projectList: [],
+      isRouterAlive: true
     }
   },
   created() {
@@ -83,9 +84,14 @@ export default {
       } else {
         state = false;
       }
-      console.log(time,state);
       return state;
-    }
+    },
+    reload () {
+      console.log(this.isRouterAlive);
+     this.isRouterAlive = false;
+     console.log(this.isRouterAlive);
+     this.$nextTick(() => (this.isRouterAlive = true));
+   }
   }
 }
 </script>
