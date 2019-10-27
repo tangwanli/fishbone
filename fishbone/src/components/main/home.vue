@@ -77,7 +77,7 @@ export default {
     });
   },
   methods: {
-    isOverDue(time) {
+    isOverDue(time) { // 判断任务时间是否过期
       let state = false;
       if (new Date(time).getTime() > Date.now()) {
         state = true;

@@ -3,7 +3,7 @@
     <!-- 任务头部 -->
     <el-header class="taskHeader" height="50px">
       <el-button-group>
-        <el-button type="primary" size="mini" round autofocus v-for="btn in btnValue">{{btn.btnName}}</el-button>
+        <el-button :class="btnColorChange(btn) ? 'btnActiveColor' : 'btnBaseColor'" @click="selectTaskType(btn)" type="primary" size="mini" round autofocus v-for="btn in btnValue">{{btn.btnName}}</el-button>
       </el-button-group>
     </el-header>
 
@@ -13,15 +13,15 @@
         <!-- 整个任务列表 -->
         <el-col :span="6" class="task-task-list">
           <!-- 整个任务列表的头部 -->
-          <el-row>
-            <el-col :span="12">
-              <el-select size="mini" v-model="value" placeholder="请选择">
-                <el-option v-for="value in options" :value="value"></el-option>
+          <el-row type="flex" justify="space-between">
+            <el-col :span="8">
+              <el-select size="mini" @change="changeTaskStatus" v-model="taskStatus" placeholder="请选择">
+                <el-option v-for="status in taskStatusArr" :value="status"></el-option>
               </el-select>
             </el-col>
-            <el-col :span="12">
-              <el-select size="mini" v-model="value" placeholder="请选择">
-                <el-option v-for="value in options" :value="value"></el-option>
+            <el-col :span="11">
+              <el-select size="mini" @change="changeTaskSorters" v-model="taskSorters" placeholder="请选择">
+                <el-option v-for="sorters in taskSortersArr" :value="sorters"></el-option>
               </el-select>
             </el-col>
           </el-row>
@@ -48,28 +48,37 @@ export default {
     return {
       msg: '开始游戏',
       btnValue: [{btnName: '我负责', isSelect: true},{btnName: '我创建', isSelect: false},{btnName: '抄送我的', isSelect: false},{btnName: '全部', isSelect: false}], // 上面的几个按钮的名字
-      dsa: 'dsa',
+      taskStatusArr: ['进行中','完成','全部'],
+      taskStatus: '进行中',
+      taskSortersArr: ['按最后更新时间','按到期时间','按分级'],
+      taskSorters: '按最后更新时间',
+      task_type: 1, // 当前任务的类型
+      status: 'running', // 当前任务状态
+      sorters: {"column":"last_up_date","direction":"desc"}, // 当前任务的排序方式
       taskList: [],
       isRouterAlive: true
-      }
+    }
   },
   created() {
-    this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', {
-      params: {
-        start: 0,
-        limit: 30,
-        sorters: {"column":"last_up_date","direction":"desc"},
-        task_type: 1,
-        status: "running"
-      }
-    }).then((res) => {
-      let resData = res.data;
-      sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
-      this.taskCount = resData.count;
-      this.taskList = resData.list;
-    });
+    this.getTaskList();
   },
   methods: {
+    getTaskList(task_type = this.task_type, status = this.status, sorters = this.sorters) { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
+      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', {
+        params: {
+          start: 0,
+          limit: 30,
+          sorters: sorters,
+          task_type: task_type,
+          status: status
+        }
+      }).then((res) => {
+        let resData = res.data;
+        sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
+        this.taskCount = resData.count;
+        this.taskList = resData.list;
+      });
+    },
     isOverDue(time) {
       let state = false;
       if (new Date(time).getTime() > Date.now()) {
@@ -79,10 +88,40 @@ export default {
       }
       return state;
     },
+    btnColorChange(btn) { // 改变btn颜色
+      return btn.isSelect;
+    },
+    selectTaskType(btn) { // 头部按钮被点击时触发，选择任务对应的类型
+      this.btnValue.forEach((value,index,arr) => {
+        value.isSelect = false; // 先要把所有的按钮颜色清空
+        if (value.btnName == btn.btnName) {
+          value.isSelect = true;
+        }
+      });
+      this.taskStatus = '进行中'; // 重置样式
+      this.taskSorters = '按最后更新时间';
+      if (btn.btnName == "我负责") {this.task_type = 1;}
+      if (btn.btnName == "我创建") {this.task_type = 2;}
+      if (btn.btnName == "抄送我的") {this.task_type = 3;}
+      if (btn.btnName == "全部") {this.task_type = 0;}
+      this.status = 'running'; // 点了头部按钮之后，需要把任务的状态重置和任务排序方式清空
+      this.sorters = {"column":"last_up_date","direction":"desc"};
+      this.getTaskList();
+    },
+    changeTaskStatus(taskStatus) { // 修改任务状态
+      if (taskStatus == '进行中') {this.status = 'running'}
+      if (taskStatus == '完成') {this.status = 'finish'}
+      if (taskStatus == '全部') {this.status = 'all'}
+      this.getTaskList();
+    },
+    changeTaskSorters(taskSorters) { // 修改任务状态
+      if (taskSorters == '按最后更新时间') {this.sorters = {"column":"last_up_date","direction":"desc"}}
+      if (taskSorters == '按到期时间') {this.sorters = {"column":"plan_end_date","direction":"desc"}}
+      if (taskSorters == '按分级') {this.sorters = {"column":"priority","direction":"desc"}}
+      this.getTaskList();
+    },
     reload () {
-      console.log(this.isRouterAlive);
      this.isRouterAlive = false;
-     console.log(this.isRouterAlive);
      this.$nextTick(() => (this.isRouterAlive = true));
    }
   }
@@ -95,7 +134,6 @@ export default {
   margin: -20px;
 }
 .taskHeader {
-  border: 1px solid red;
   line-height: 50px;
   text-align: left;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
