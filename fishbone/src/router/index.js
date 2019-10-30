@@ -6,6 +6,11 @@ import task from '@/components/main/task'
 import DetailTask from '@/components/main/DetailTask'
 import project from '@/components/main/project'
 import DetailProject from '@/components/main/DetailProject'
+import projectPreview from '@/components/main/projectPreview'
+import projectDoc from '@/components/main/projectDoc'
+import projectChart from '@/components/main/projectChart'
+import projectCalendar from '@/components/main/projectCalendar'
+import projectTaskList from '@/components/main/projectTaskList'
 
 
 
@@ -41,9 +46,30 @@ export default new Router({
       component: project
     },
     {
-      path: '/DetailProject',
+      path: '/DetailProject/:id',
       name: 'DetailProject',
-      component: DetailProject
+      component: DetailProject,
+      children: [{
+        path: '/DetailProject/:id/projectPreview',
+        name: 'projectPreview',
+        component: projectPreview
+      },{
+        path: '/DetailProject/:id/projectDoc',
+        name: 'projectDoc',
+        component: projectDoc
+      },{
+        path: '/DetailProject/:id/projectChart',
+        name: 'projectChart',
+        component: projectChart
+      },{
+        path: '/DetailProject/:id/projectCalendar',
+        name: 'projectCalendar',
+        component: projectCalendar
+      },{
+        path: '/DetailProject/:id/projectTaskList',
+        name: 'projectTaskList',
+        component: projectTaskList
+      }]
     },
     {
     	name: 'redirect',

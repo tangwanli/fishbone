@@ -35,7 +35,7 @@ export default {
         infoList: []
     }
   },
-  props: ['aimPosition','tag2'], // 这里这个aimPosition和tag。tag未传过来的标签，根据这个信息来显示选择了哪些。
+  props: ['aimPosition','tag2'], // 这里这个aimPosition和tag。tag为传过来的标签数组，根据这个信息来显示选择了哪些。
   created() {   
     this.initTag();                  // aimPosition为一个定位。即，当前的已选择是选择的哪一个。
     this.initList(); // 初始化所有数据
@@ -59,7 +59,7 @@ export default {
         let index = this.tagArr.indexOf(tagName);
         this.tagArr.splice(index,1);
       } else {
-        if (this.aimPosition == 'cc_member' || this.tagArr.length == 0) { // cc_member就可以选择多个人，其它就只能选择一个人
+        if (this.aimPosition == 'cc_member' || this.aimPosition == 'partner' || this.tagArr.length == 0) { // cc_member就可以选择多个人，其它就只能选择一个人
           this.tagArr.push(tagName);
         }
       }
@@ -73,14 +73,14 @@ export default {
     },
     initList() {
         // 显示已选择样式
-      if (this.aimPosition == 'manager') { // 点开的为负责人\
-        this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/member_list.json', { 
-        }).then((res) => {
-          let resData = res.data;
-          this.infoList = resData.list;
-        });
-      }
-      if (this.aimPosition == 'cc_member') { // 点开的为抄送人\
+      // if (this.aimPosition == 'manager') { // 点开的为负责人\
+      //   this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/member_list.json', { 
+      //   }).then((res) => {
+      //     let resData = res.data;
+      //     this.infoList = resData.list;
+      //   });
+      // }
+      if (this.aimPosition == 'manager' || this.aimPosition == 'cc_member' || this.aimPosition == 'partner') { // 点开的为抄送人。这里这个partner为项目页独有的
         this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/member_list.json', { 
         }).then((res) => {
           let resData = res.data;
@@ -102,18 +102,18 @@ export default {
       if (this.input != '' || this.input != null) {
         this.initList();
       } else {
-        if (this.aimPosition == 'manager') { // 点开的为负责人
-          this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/member_list.json', { 
-            params: {
-              member_name: this.input
-            }
-          }).then((res) => {
-            let resData = res.data;
-            this.infoList = resData.list;
-            console.log(this.infoList);
-          });
-        }
-        if (this.aimPosition == 'cc_member') { // 点开的为抄送人
+        // if (this.aimPosition == 'manager') { // 点开的为负责人
+        //   this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/member_list.json', { 
+        //     params: {
+        //       member_name: this.input
+        //     }
+        //   }).then((res) => {
+        //     let resData = res.data;
+        //     this.infoList = resData.list;
+        //     console.log(this.infoList);
+        //   });
+        // }
+        if (this.aimPosition == 'manager' || this.aimPosition == 'cc_member' || this.aimPosition == 'partner') { // 点开的为负责人、抄送人或者普通成员
           this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/member_list.json', { 
             params: {
               member_name: this.input

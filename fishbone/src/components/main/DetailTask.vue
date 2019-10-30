@@ -13,11 +13,13 @@
         <el-row type="flex" justify="flex-start">
           <el-col :span="6">
             负责人：<span class="selectIt" @click="controlBoxShow('manager')">{{managerName[0]}}</span>
-            <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" aimPosition="manager" class="searchBox" :active="activeName" @changeSearch="changeSearchInfo"></searchBox>
+            <!-- 注，这里删了个 :active="activeName"，不知道这个是干嘛的，所以删了 -->
+            <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" aimPosition="manager" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
           <el-col :span="18">抄送人：
             <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeTag(tagName)">{{tagName}}</el-tag>
-            <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" :active="activeName" @changeSearch="changeSearchInfo"></searchBox></el-col>
+            <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
+          </el-col>
         </el-row>
         <el-row type="flex" justify="flex-start" class="second-row">
           <el-col :span="12" class="taskDate">时间：
@@ -32,7 +34,7 @@
             </el-select>
           </el-col>
           <el-col :span="6">项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0]}}</span>
-            <searchBox @cancelBox="cancelBox" v-if="isProShowBox" :tag2="projectName" aimPosition="project"  class="searchBox proSearchBox" :active="activeName" @changeSearch="changeSearchInfo"></searchBox>
+            <searchBox @cancelBox="cancelBox" v-if="isProShowBox" :tag2="projectName" aimPosition="project"  class="searchBox proSearchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
         <el-row type="flex" justify="flex-start">
@@ -86,15 +88,6 @@
                 </p>
               </el-card>
             </el-timeline-item>
-            <!-- <el-timeline-item type="danger" timestamp="2018/4/15" placement="top" size="large" icon="el-icon-info">
-              <el-card>
-                <p>
-                  <span>王小虎ds :</span>
-                  <br>
-                  <span>dsad我sadsadsad</span>
-                </p>
-              </el-card>
-            </el-timeline-item> -->
           </el-timeline>
         </el-tab-pane>
         <el-tab-pane label="操作记录" name="second">这个操作记录已经合在上面任务记录里面了！！！！大佬们看着玩吧！！！！</el-tab-pane>
@@ -112,10 +105,10 @@ export default {
   data () {
     return {
       url: '',
-      managerName: ['未设置'],
+      managerName: ['未设置'], // 这三个是几个可以弹出search-box的地方的默认值
       projectName: ['未设置'],
       ccMembers: ['未设置'],
-      isManagerShowBox: false,
+      isManagerShowBox: false, // 控制3个地方serch-box隐藏和显示
       isCcShowBox: false,
       isProShowBox: false,
       plan_start_date: '',
@@ -261,7 +254,7 @@ export default {
     },
     formatDate(date) {
       let year = date.getFullYear(),
-          month = date.getMonth(),
+          month = date.getMonth() + 1,
           day = date.getDate(),
           hour = date.getHours(),
           minute = date.getMinutes() < 10 ? ('0' + date.getMinutes()) : date.getMinutes(),

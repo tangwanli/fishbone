@@ -9,7 +9,7 @@
 
     <!-- 项目主体区 -->
     <el-main class="main-table">
-      <el-table :data="projectList" stripe highlight-current-row height="590"> 
+      <el-table @row-click="selectProject" :data="projectList" stripe highlight-current-row height="590"> 
           <el-table-column :fixed="true" type="index" label="序号" width="50"></el-table-column>
           <el-table-column :fixed="col.fixed" v-for="col in tableCol" :label="col.label" :prop="col.prop" :min-width="col.width" sortable="true"></el-table-column>
       </el-table>
@@ -38,11 +38,11 @@ export default {
     this.getProjectList();
   },
   methods: {
-    getProjectList(status = this.status, sorters = this.sorters, index = 0) { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
+    getProjectList(status = this.status, sorters = this.sorters, currentPage = this.currentPage) { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
       this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/project/project_list.json', {
         params: {
-          start: index,
-          limit: 30,
+          start: (currentPage - 1) * 20,
+          limit: 20,
           sorters: sorters,
           status: status
         }
@@ -50,8 +50,7 @@ export default {
         let resData = res.data;
         sessionStorage.setItem('projectResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
         this.projectList = resData.list;
-        // this.count = resData.count;
-        console.log(this.projectList);
+        this.count = resData.count;
       });
     },
     btnColorChange(btn) { // 改变btn颜色
@@ -64,18 +63,18 @@ export default {
           value.isSelect = true;
         }
       });
-      // this.taskStatus = '进行中'; // 重置样式
-      // this.taskSorters = '按最后更新时间';
-      // if (btn.btnName == "我负责") {this.task_type = 1;}
-      // if (btn.btnName == "我创建") {this.task_type = 2;}
-      // if (btn.btnName == "抄送我的") {this.task_type = 3;}
-      // if (btn.btnName == "全部") {this.task_type = 0;}
-      // this.status = 'running'; // 点了头部按钮之后，需要把任务的状态重置和任务排序方式清空
-      // this.sorters = {"column":"last_up_date","direction":"desc"};
-      // this.getProjectList();
+      this.currentPage = 1; // 重置分页
+      if (btn.btnName == "进行中") {this.status = 'running';}
+      if (btn.btnName == "完成") {this.status = 'finish';}
+      if (btn.btnName == "全部") {this.status = 'all';}
+      this.getProjectList();
     },
     changePage(index) { // 页码切换
-      console.log(index);
+      this.currentPage = index;
+      this.getProjectList();
+    },
+    selectProject(row, column, event) { // 表格数据被点击，切换为详细项目信息
+      this.$router.push('/DetailProject/' + row.project_id + '/projectPreview');
     }
   }
 }
