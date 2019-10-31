@@ -160,7 +160,7 @@ export default {
       this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
         params: {
           subject_id: this.task_id,
-          type: 'project'
+          type: 'task'
         }
       }).then((res) => {
         let resData = res.data;
@@ -492,11 +492,11 @@ export default {
 
 <style>
 /* 所有组件里面共用的样式。用来修改scope组件限制了作用域的组件默认样式 */
+/* 最下面评论样式修改 */
 #DetailTask .task-com input {
   font-size: 14px;
   text-align: left;
 }
-/* 最下面评论样式修改 */
 #DetailTask #tab-first, #DetailTask #tab-second {
   padding-left: 0;
 }

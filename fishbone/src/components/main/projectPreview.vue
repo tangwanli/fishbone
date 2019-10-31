@@ -33,15 +33,43 @@
               </el-col>
           </el-row>
           <el-row type="flex" justify="start">
-              <el-col :span="2"><i class="el-icon-document"></i> 项目描述 &nbsp;&nbsp;</el-col>
-              <el-col :span="22">没有</el-col>
+              <el-col :span="2"><i class="el-icon-finished"></i> 优先级 &nbsp;&nbsp;</el-col>
+              <el-col :span="2">
+                <el-select v-model="priorityInitValue" placeholder="普通" size="mini" @change="changePriority">
+                    <el-option v-for="priority in priorityList" :value="priority" :label="priority"></el-option>
+                </el-select>
+              </el-col>
           </el-row>
           <el-row type="flex" justify="start">
-              <el-col>这东西是我创建的啊！！！</el-col>
+              <el-col :span="24" class="creatorBox">
+                  创建人：{{creator}}
+              </el-col>
+          </el-row>
+          <el-row class="projectContent" type="flex" justify="start">
+              <el-col :span="4"><i class="el-icon-document"></i> 项目描述 &nbsp;&nbsp;<i class="el-icon-edit-outline" @click="isDisableModifyContent = (isDisableModifyContent ? false : true)"></i></el-col>
+              <el-col :span="15" class="contentBox"><el-input type="textarea" @blur="changeContent" placeholder="请输入内容:" v-model="content" :autosize="{maxRows: 7}" maxlength="1000" show-word-limit :disabled="isDisableModifyContent"></el-input></el-col>
           </el-row>
       </el-main>
 
-      <el-footer>footerrrrrrrrrrrrrrrrrrrrrr</el-footer>
+    <el-footer class="previewFooter"  height="190px">
+      <el-tabs tab-position="left" v-model="activeName">
+        <el-tab-pane label="项目进展" name="first">
+          <el-timeline>
+            <el-timeline-item v-for="comment in commentArr" type="danger" :timestamp="comment.comment_times" placement="top" size="large" icon="el-icon-info">
+              <el-card>
+                <p>
+                  <span>{{comment.nick_name}} :</span>
+                  <br>
+                  <span>{{comment.content}}</span>
+                </p>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </el-tab-pane>
+        <el-tab-pane label="操作记录" name="second">这个操作记录已经合在上面项目记录里面了！！！！大佬们看着玩吧！！！！</el-tab-pane>
+      </el-tabs>
+      <el-input @blur="subComment" class="project-com" size="medium" type="text" placeholder="请大佬写下你的评论吧！" v-model="commentContent" clearable show-word-limit maxlength="1000"></el-input>
+    </el-footer>
   </el-container>
 </template>
 
@@ -65,13 +93,22 @@ export default {
       managerName: ['未设置'],
       partners: ['未设置'],
       ccMembers: ['未设置'],
+      isDisableModifyContent: true, // 主内容区是否可修改
+      content: '',
+      priorityInitValue: '',
+      priorityList: ['低','普通','高','非常重要'],
+      creator: '',
+      activeName: 'first', // 这个是任务最下面标签的默认选中
+      projectId: '',
+      commentArr: [],
+      commentContent: '',
     }
   },
   props: ['projectInfo'],
   created() {
     console.log('进来了',this.projectInfo);
     this.initData();
-    // this.initComment();
+    this.initComment();
   },
   methods: {
     initData() { // 初始化所有数据
@@ -82,7 +119,30 @@ export default {
         this.percent = projectInfo.percent;
         this.plan_start_date = projectInfo.plan_start_date;
         this.plan_end_date = projectInfo.plan_end_date;
+        this.content = projectInfo.content;
+        this.priorityInitValue = projectInfo.priority;
+        this.creator = projectInfo.creator;
+        this.projectId = this.$route.params.id;
         this.url = '/project/modify.json/' + this.$route.params.id;
+    },
+    initComment() { // 初始化评论
+      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
+        params: {
+          subject_id: this.projectId,
+          type: 'project'
+        }
+      }).then((res) => {
+        let resData = res.data;
+        this.commentArr = resData.comment.map((value,index,arr) => {
+          let temp = {
+            nick_name: value.creator.nick_name,
+            content: value.content,
+            comment_times: value.comment_times
+          };
+          return temp;
+        });
+        console.log('初始化评论的结果', this.commentArr);
+      });
     },
     changeStartDate(date) { // 修改任务的开始日期
         let resDate = this.formatDate(new Date(date));
@@ -125,6 +185,7 @@ export default {
             partner: this.partners[0] == '未设置' ? [''] : this.partners
           });
       }
+      console.log('传过来的tag', aimPosition, tagArr);
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
       let managerName2 = this.projectInfo.manager.nick_name;
@@ -140,9 +201,7 @@ export default {
         this.managerName = temp;
       }
       if (partners2) {
-        let temp = [];
-        temp.push(partners2);
-        this.partners = temp;
+        this.partners = partners2;
       }
       if (ccMembers2) {
         this.ccMembers = ccMembers2;
@@ -183,6 +242,30 @@ export default {
       this.$ajax.post(this.url, { // 修改任务负责人
         partner: this.partners[0] == '未设置' ? [''] : this.partners
       });
+    },
+    changeContent() { // 修改项目描述
+      this.$ajax.post(this.url, {
+        content: this.content
+      });
+      this.isDisableModifyContent = true;
+    },
+    changePriority(value) { // 修改任务优先级
+      this.$ajax.post(this.url, {
+        priority: value
+      });
+    },
+    subComment() { // 提交评论
+      let temp = {
+          nick_name: 'this is the username',       
+          content: this.commentContent,
+          comment_times: this.formatDate(new Date())
+      };
+      this.commentArr.push(temp);
+      this.$ajax.post(this.url, {
+          content: this.commentContent,
+          type: 'project'
+      });
+      this.commentContent = '';
     }
   },
   components: {
@@ -205,10 +288,11 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   background: rgb(255,255,255);
 }
-.proSearchBox {
+/* .proSearchBox {
   left: -90%;
-}
+} */
 #projectPreview {
+    height: 650px;
     padding: 10px;
     background: #fff;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
@@ -231,6 +315,11 @@ export default {
 }
 
 /* 内容区样式 */
+.previewMain {
+    height: 455px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
 .previewMain .el-col {
     height: 36px;
     line-height: 36px;
@@ -259,11 +348,90 @@ export default {
 .selectIt:hover {
   text-shadow: 0 0 12px red;
 }
+.projectContent {
+    flex-flow: column;
+}
+#projectPreview .creatorBox {
+    font-size: 13px;
+    color: #a9a9a9;
+}
+
+/* 页面最下面部分 */
+.previewFooter {
+    border-top: 1px dotted rgb(213, 213, 213);
+}
+.el-tabs {
+  height: 150px;
+  overflow: auto;
+  margin-bottom: 10px;
+}
 </style>
 <style>
 /* 日期选择器那里样式修改 */
 #projectPreview .previewMain .el-date-editor.el-input {
   width: 15%;
   text-indent: 0;
+}
+
+
+/* 下面为从DetailTask里面拿过来的样式 */
+/* 所有组件里面共用的样式。用来修改scope组件限制了作用域的组件默认样式 */
+/* 最下面评论样式修改 */
+#projectPreview .project-com input {
+  font-size: 14px;
+  text-align: left;
+}
+#projectPreview #tab-first, #projectPreview #tab-second {
+  padding-left: 0;
+}
+#projectPreview .el-tabs .el-timeline-item__timestamp {
+  text-align: left;
+}
+#projectPreview .el-tabs .el-card__body {
+  padding: 10px;
+  text-align: left;
+}
+#projectPreview .el-tabs .el-card__body p {
+  text-align: left;
+  font-size: 13px;
+  color: #666;
+}
+#projectPreview .el-tabs .el-card__body p span:nth-of-type(1) {
+  display: inline-block;
+  margin-bottom: 10px;
+   -webkit-text-stroke: 0.5px red;
+}
+
+
+/* 抄送人标签样式修改 */
+/* #projectPreview .previewMain .el-tag .el-icon-close {
+  text-indent: 0;
+  font-size: 12px;
+} */
+#projectPreview .previewMain .el-tag--mini { /* 这个为修改标签的样式 */
+  padding-left: 10px;
+}
+#projectPreview .previewMain .el-input--mini {
+  left: 20px;
+}
+#projectPreview .previewMain .el-input__count-inner {
+  position: relative;
+  left: -15px;
+}
+
+/* 优先级选择框修改 */
+/* #projectPreview .previewMain .el-select .el-input__suffix{
+  display: none;
+}
+#projectPreview .previewMain .el-select .el-input__inner{
+  padding-right: 10px;
+  padding-left: 0;
+  text-align: center;
+} */
+
+/* 主内容区，输入框样式修改 */
+#projectPreview .previewMain .el-textarea__inner {
+  text-align: left;
+  height: 100%;
 }
 </style>
