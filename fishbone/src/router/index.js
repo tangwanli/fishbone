@@ -64,7 +64,12 @@ export default new Router({
       },{
         path: '/DetailProject/:proId/projectCalendar',
         name: 'projectCalendar',
-        component: projectCalendar
+        component: projectCalendar,
+        children: [{
+          path: '/DetailProject/:proId/projectCalendar/:id',
+          name: 'DetailTask',
+          component: DetailTask
+        }]
       },{
         path: '/DetailProject/:proId/projectTaskList',
         name: 'projectTaskList',

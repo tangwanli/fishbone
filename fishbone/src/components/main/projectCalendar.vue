@@ -12,7 +12,7 @@
             </el-col>
 
             <!-- 展示对应的任务列表 -->
-            <el-col :span="24" v-for="item in showCellTaskList(data)">{{item}}</el-col>
+            <el-col :span="24" v-for="task in showCellTaskList(data)" @click.native="selectTask(task)">{{task.taskName}}</el-col>
           </el-row>
         </el-calendar>
       </el-col>
@@ -47,16 +47,9 @@ export default {
         let resData = res.data;
         sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
         this.projectTaskList = resData.list;
-        console.log(this.projectTaskList,this.$route.params.proId);
       });
     },
-    selectTask(row, column, event) { // 表格数据被点击，切换为详细任务信息
-      this.reload();
-      this.$router.push('/DetailProject/' + this.$route.params.proId + '/projectTaskList/' + row.task_id);
-     
-    },
     showCellTaskList(data) { // 展示单元格里面的所有任务
-      console.log(data);
       let cellDate = new Date(data.day),
           taskArr = [];
       this.projectTaskList.forEach((value,index,arr) => {
@@ -68,16 +61,18 @@ export default {
               month2 = cellDate.getMonth() + 1,
               day2 = cellDate.getDate();
           if (year1 == year2 && month1 == month2 && day1 == day2) {
-            console.log('这里要返回任务的名字了',value.task_name);
             let temp = {
               taskId: value.task_id,
               taskName: value.task_name
             };
             taskArr.push(temp);
           }
-          console.log(year1,month1,day1,year2,month2,day2);
       });
-        console.log('最后的数组是', taskArr);
+        return taskArr;
+    },
+    selectTask(task) { // 表格数据被点击，切换为详细任务信息
+      this.reload();
+      this.$router.push('/DetailProject/' + this.$route.params.proId + '/projectCalendar/' + task.taskId);
     },
     reload () {
      this.isRouterAlive = false;
@@ -90,7 +85,27 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .is-selected {
-    /* color: #1989FA; */
-    color: red;
+    color: #1989FA;
+}
+.el-calendar {
+  overflow: hidden;
+}
+.main-calendar .el-calendar .el-row .el-col:nth-of-type(1)~.el-col:hover {
+  transition: 1s;
+  background: #1989FA;
+}
+</style>
+<style>
+/* #projectCalendar .el-calendar .el-calendar-table__row td .el-calendar-day{
+  width: 200px;
+  height: 200px;
+  background: red;
+} */
+#projectCalendar .el-calendar .el-calendar-table__row td .el-calendar-day {
+  height: 80px;
+  overflow: hidden;
+}
+#projectCalendar .el-calendar .el-calendar-table__row td .el-calendar-day:hover {
+  overflow: auto;
 }
 </style>
