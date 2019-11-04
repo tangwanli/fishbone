@@ -46,29 +46,34 @@ export default new Router({
       component: project
     },
     {
-      path: '/DetailProject/:id',
+      path: '/DetailProject/:proId',
       name: 'DetailProject',
       component: DetailProject,
       children: [{
-        path: '/DetailProject/:id/projectPreview',
+        path: '/DetailProject/:proId/projectPreview',
         name: 'projectPreview',
         component: projectPreview
       },{
-        path: '/DetailProject/:id/projectDoc',
+        path: '/DetailProject/:proId/projectDoc',
         name: 'projectDoc',
         component: projectDoc
       },{
-        path: '/DetailProject/:id/projectChart',
+        path: '/DetailProject/:proId/projectChart',
         name: 'projectChart',
         component: projectChart
       },{
-        path: '/DetailProject/:id/projectCalendar',
+        path: '/DetailProject/:proId/projectCalendar',
         name: 'projectCalendar',
         component: projectCalendar
       },{
-        path: '/DetailProject/:id/projectTaskList',
+        path: '/DetailProject/:proId/projectTaskList',
         name: 'projectTaskList',
-        component: projectTaskList
+        component: projectTaskList,
+        children: [{
+          path: '/DetailProject/:proId/projectTaskList/:id',
+          name: 'DetailTask',
+          component: DetailTask
+        }]
       }]
     },
     {

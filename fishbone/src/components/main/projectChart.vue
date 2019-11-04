@@ -1,5 +1,6 @@
 <template>
   <div class="projectChart">
+    {{msg}}
   </div>
 </template>
 
@@ -8,7 +9,7 @@ export default {
   name: 'projectChart',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: '这里就是甘特图了'
     }
   }
 }

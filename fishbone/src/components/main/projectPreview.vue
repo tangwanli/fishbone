@@ -106,7 +106,7 @@ export default {
   },
   props: ['projectInfo'],
   created() {
-    console.log('进来了',this.projectInfo);
+    console.log('进来项目概况了',this.projectInfo);
     this.initData();
     this.initComment();
   },
@@ -122,8 +122,8 @@ export default {
         this.content = projectInfo.content;
         this.priorityInitValue = projectInfo.priority;
         this.creator = projectInfo.creator;
-        this.projectId = this.$route.params.id;
-        this.url = '/project/modify.json/' + this.$route.params.id;
+        this.projectId = this.$route.params.proId;
+        this.url = '/project/modify.json/' + this.$route.params.proId;
     },
     initComment() { // 初始化评论
       this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
@@ -163,17 +163,19 @@ export default {
             hour = date.getHours(),
             minute = date.getMinutes() < 10 ? ('0' + date.getMinutes()) : date.getMinutes(),
             second = date.getSeconds() < 10 ? ('0' + date.getSeconds()) : date.getSeconds();
+            month = month < 10 ? ('0' + month) : month;
+            day = day < 10 ? ('0' + day) : day;
         return year + '-' + month + '-' + day  + ' ' + hour + ':' + minute + ':' + second;
         // ' 00:00:00'
     },
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
-      if (aimPosition == 'manager') { // 点开的为负责人\
+      if (aimPosition == 'manager') { // 点开的为负责人
           this.managerName = tagArr.length ? tagArr : ['未设置'];
           this.$ajax.post(this.url, { // 修改任务负责人
             manager_name: this.managerName[0] == '未设置' ? '' : this.managerName[0]
           });
       }
-      if (aimPosition == 'cc_member') { // 点开的为抄送人\
+      if (aimPosition == 'cc_member') { // 点开的为抄送人
           this.ccMembers = tagArr.length ? tagArr : ['未设置'];
           this.$ajax.post(this.url, { // 修改任务负责人
             cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
@@ -185,7 +187,6 @@ export default {
             partner: this.partners[0] == '未设置' ? [''] : this.partners
           });
       }
-      console.log('传过来的tag', aimPosition, tagArr);
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
       let managerName2 = this.projectInfo.manager.nick_name;
@@ -255,17 +256,19 @@ export default {
       });
     },
     subComment() { // 提交评论
-      let temp = {
-          nick_name: 'this is the username',       
-          content: this.commentContent,
-          comment_times: this.formatDate(new Date())
-      };
-      this.commentArr.push(temp);
-      this.$ajax.post(this.url, {
-          content: this.commentContent,
-          type: 'project'
-      });
-      this.commentContent = '';
+      if (this.commentContent != '') {
+        let temp = {
+            nick_name: 'this is the username',       
+            content: this.commentContent,
+            comment_times: this.formatDate(new Date())
+        };
+        this.commentArr.push(temp);
+        this.$ajax.post(this.url, {
+            content: this.commentContent,
+            type: 'project'
+        });
+        this.commentContent = '';
+      }
     }
   },
   components: {

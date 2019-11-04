@@ -143,5 +143,4 @@ export default {
 #project .main-table .el-table__row { /* 使表格出现横向条 */
   overflow: auto;
 }
-
 </style>

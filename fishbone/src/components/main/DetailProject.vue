@@ -1,9 +1,14 @@
 <template>
   <el-container id="DetailProject">
     <el-header class="projectHeader" height="50px">
-      <el-button-group>
-        <el-button :class="btnColorChange(btn) ? 'btnActiveColor' : 'btnBaseColor'" @click="selectTaskType(btn)" type="primary" size="mini" round autofocus v-for="btn in btnValue">{{btn.btnName}}</el-button>
-      </el-button-group>
+      <el-row type="flex" justify="start">
+        <el-col :span="21">
+          <el-button-group>
+            <el-button :class="btnColorChange(btn) ? 'btnActiveColor' : 'btnBaseColor'" @click="selectTaskType(btn)" type="primary" size="mini" round autofocus v-for="btn in btnValue">{{btn.btnName}}</el-button>
+          </el-button-group>
+        </el-col>
+        <el-col :span="3"><el-button @click="deleteProject" size="mini" type="danger" :round="true" plain>删除项目</el-button></el-col>
+      </el-row>
     </el-header>
 
     <el-main>
@@ -20,13 +25,15 @@ export default {
       msg: '开始游戏',
       btnValue: [{btnName: '概况', isSelect: true},{btnName: '甘特图', isSelect: false},{btnName: '任务列表', isSelect: false},{btnName: '日历', isSelect: false},{btnName: '文档', isSelect: false}], // 上面的几个按钮的名字
       projectInfo: [],
-      projectId: '1'
+      projectId: '1',
+      url: ''
     }
   },
   created() {
     let resData = JSON.parse(sessionStorage.getItem('projectResList')),
         projectList = resData.list;
-    this.projectId = this.$route.params.id;
+    this.projectId = this.$route.params.proId;
+    this.url = '/project/modify.json/' + this.$route.params.proId;
     projectList.find((value,index,arr) => { // 找到对应的任务
       if (value.project_id == this.projectId) {
         this.projectInfo = value;
@@ -47,11 +54,16 @@ export default {
       });
       let childPath = 'projectPreview';
       if (btn.btnName == "概况") {childPath = 'projectPreview';}
-      if (btn.btnName == "甘特图") {childPath = 'projectCalendar';}
+      if (btn.btnName == "甘特图") {childPath = 'projectChart';}
       if (btn.btnName == "任务列表") {childPath = 'projectTaskList';}
       if (btn.btnName == "日历") {childPath = 'projectCalendar';}
       if (btn.btnName == "文档") {childPath = 'projectDoc';}
       this.$router.push('/DetailProject/' + this.projectId + '/' + childPath);
+    },
+    deleteProject() { // 删除项目
+      let path = '/project';
+      this.$router.push(path);
+      this.$ajax.delete(this.url);
     }
   }
 }
@@ -68,6 +80,9 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   background: rgb(255,255,255);
 }
+.projectHeader .el-col {
+  text-align: left;
+}
 .projectHeader .el-button {
   border: 1px solid rgb(238,238,238);
   transition: 1s;
@@ -82,4 +97,5 @@ export default {
 .btnActiveColor {
   background: rgb(103,167,246);
 }
+
 </style>

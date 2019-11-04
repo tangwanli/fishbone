@@ -131,6 +131,7 @@ export default {
   //   console.log('go', to, from,this.$route.path);
   // },
   created() {
+    console.log('进入了详细任务信息');
     let resData = JSON.parse(sessionStorage.getItem('taskResList')),
         taskCount = resData.count,
         taskList = resData.list,
@@ -259,6 +260,8 @@ export default {
           hour = date.getHours(),
           minute = date.getMinutes() < 10 ? ('0' + date.getMinutes()) : date.getMinutes(),
           second = date.getSeconds() < 10 ? ('0' + date.getSeconds()) : date.getSeconds();
+          month = month < 10 ? ('0' + month) : month;
+          day = day < 10 ? ('0' + day) : day;
       return year + '-' + month + '-' + day  + ' ' + hour + ':' + minute + ':' + second;
       // ' 00:00:00'
     },
@@ -293,17 +296,20 @@ export default {
       }
     },
     subComment() { // 提交评论
-      let temp = {
-          nick_name: 'this is the username',       
-          content: this.commentContent,
-          comment_times: this.formatDate(new Date())
-      };
-      this.commentArr.push(temp);
-      this.$ajax.post(this.url, {
-          content: this.commentContent,
-          type: 'task'
-      });
-      this.commentContent = '';
+      if (this.commentContent != '') {
+        let temp = {
+            nick_name: 'this is the username',       
+            content: this.commentContent,
+            comment_times: this.formatDate(new Date())
+        };
+        this.commentArr.push(temp);
+        this.$ajax.post(this.url, {
+            content: this.commentContent,
+            type: 'task'
+        });
+        this.commentContent = '';
+      }
+      
     },
     closeTask() { // 关闭任务
       let path = this.$route.path.replace('/' + this.$route.params.id, '');
