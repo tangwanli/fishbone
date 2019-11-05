@@ -109,7 +109,7 @@ export default {
       managerName: ['未设置'], // 这三个是几个可以弹出search-box的地方的默认值
       projectName: ['未设置'],
       ccMembers: ['未设置'],
-      isManagerShowBox: false, // 控制3个地方serch-box隐藏和显示
+      isManagerShowBox: false, // 控制3个地方search-box隐藏和显示
       isCcShowBox: false,
       isProShowBox: false,
       plan_start_date: '',
