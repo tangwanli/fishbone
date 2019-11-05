@@ -7,10 +7,13 @@
         </el-row>
         <el-menu class="main-menu" default-active="/home" background-color="rgb(244,244,244)" text-color="#2c3e50" :router="true">
           <el-menu-item index="/home"><i class="el-icon-s-home"></i>首页</el-menu-item>
-          <el-menu-item index="/task"><i class="el-icon-s-order"></i>任务</el-menu-item>
-          <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目</el-menu-item>
+          <el-menu-item index="/task"><i class="el-icon-s-order"></i>任务<i @click="controlAddTask" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
+          <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目<i class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
           <el-menu-item index="4"><i class="el-icon-date"></i>日程</el-menu-item>
         </el-menu>
+        <section v-if="addTaskBoxVisible">
+          <addTaskBox :addTaskBoxVisible="addTaskBoxVisible" @closeAddTask="closeAddTask"></addTaskBox>
+        </section>
         <el-divider class="menu-divider"></el-divider>
       </el-main>
 
@@ -22,10 +25,26 @@
 </template>
 
 <script>
+import addTaskBox from '@/components/addTaskBox'
+
 export default {
   name: 'leftMenu',
   data () {
-    return {}
+    return {
+      addTaskBoxVisible: false
+    }
+  },
+  methods: {
+    controlAddTask() {
+      this.addTaskBoxVisible = true;
+      console.log(this.addTaskBoxVisible);
+    },
+    closeAddTask() { // 关闭添加任务的dialog
+      this.addTaskBoxVisible = false;
+    }
+  },
+  components: {
+    addTaskBox
   }
 }
 </script>
@@ -36,6 +55,7 @@ export default {
     padding: 0;
 }
 .el-aside {
+  position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
   background-color: rgb(244,244,244);
 }
@@ -49,13 +69,25 @@ export default {
 }
 
 
-.el-menu-item:hover, .el-menu-item.is-active{ /* 这里这个样式，.el-menu-item.is-active，用来设置菜单被选中时候的颜色 */ 
+.el-menu-item:hover, .el-menu-item.is-active { /* 这里这个样式，.el-menu-item.is-active，用来设置菜单被选中时候的颜色 */ 
   background-color: #fff !important;
 }
 .el-menu-item {
+    position: relative;
     height: 40px;
     line-height: 40px;
     text-align: left;
+}
+.add-btn {       /* 两个加号按钮 */
+  position: absolute;
+  right: 0;
+  line-height: 40px;
+  font-size: 16px;
+  transition: 1s;
+}
+.addBtn:hover {
+  transform: rotate(-90deg) scale(1.2);
+  color: red;
 }
 /* 下面几个为字体图标样式 */
 .el-icon-s-home {

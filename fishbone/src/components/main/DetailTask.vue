@@ -21,6 +21,7 @@
             <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
+        
         <el-row type="flex" justify="flex-start" class="second-row">
           <el-col :span="12" class="taskDate">时间：
             <el-date-picker v-model="plan_start_date" @change="changeStartDate" type="date" size="mini" placeholder="选择日期" :clearable="false" :editable="false"></el-date-picker>

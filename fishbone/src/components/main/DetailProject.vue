@@ -97,5 +97,4 @@ export default {
 .btnActiveColor {
   background: rgb(103,167,246);
 }
-
 </style>

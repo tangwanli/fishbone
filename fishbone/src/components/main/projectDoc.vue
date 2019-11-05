@@ -1,10 +1,14 @@
 <template>
   <section id="projectDoc">
-    <el-upload @change="demo" action="https://jsonplaceholder.typicode.com/posts/" ref="upload" multiple :on-change="handleChange" :file-list="fileList" :auto-upload="false">
-        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">点击上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-    </el-upload>
+    <el-row>
+      <el-col :span="7">
+        <el-upload @change="demo" action="https://jsonplaceholder.typicode.com/posts/" ref="upload" multiple :on-change="handleChange" :file-list="fileList" :auto-upload="false">
+            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">点击上传到服务器</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+        </el-upload>
+      </el-col>
+    </el-row>
   </section>
 </template>
 
@@ -37,7 +41,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.upload-btn {
-  display: block;
+#projectDoc {
+  height: 650px;
+  background: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+#projectDoc .el-row {
+  padding-top: 35px;
 }
 </style>

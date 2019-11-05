@@ -39,6 +39,8 @@ export default {
   },
   methods: {
     getProjectList(status = this.status, sorters = this.sorters, currentPage = this.currentPage) { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
+      // 
+      // http://192.168.43.146:8080/fish_boom/proj/listProj
       this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/project/project_list.json', {
         params: {
           start: (currentPage - 1) * 20,
