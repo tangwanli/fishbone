@@ -30,7 +30,7 @@ export default {
       currentPage: 1,
       projectList: [],
       count: 100, // 所有数据的总数
-      tableCol: [{prop: 'name',label: '名称',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'manager.nick_name',label: '负责人',width: '80'},{prop: 'plan_start_date',label: '开始',width: '100'},{prop: 'plan_end_date',label: '结束',width: '100'},{prop: 'status',label: '阶段',width: '80'},{prop: 'percent',label: '进度',width: '80'},{prop: 'last_comment',label: '最新进展',width: '800'}],
+      tableCol: [{prop: 'name',label: '名称',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'manager.nick_name',label: '负责人',width: '80'},{prop: 'plan_start_date',label: '开始',width: '100'},{prop: 'plan_end_date',label: '结束',width: '100'},{prop: 'percent',label: '进度',width: '80'},{prop: 'last_comment',label: '最新进展',width: '800'}],
       dsada: ''
     }
   },

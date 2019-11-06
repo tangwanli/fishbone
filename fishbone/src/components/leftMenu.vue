@@ -8,11 +8,14 @@
         <el-menu class="main-menu" default-active="/home" background-color="rgb(244,244,244)" text-color="#2c3e50" :router="true">
           <el-menu-item index="/home"><i class="el-icon-s-home"></i>首页</el-menu-item>
           <el-menu-item index="/task"><i class="el-icon-s-order"></i>任务<i @click="controlAddTask" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
-          <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目<i class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
+          <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目<i @click="controlAddProject" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
           <el-menu-item index="4"><i class="el-icon-date"></i>日程</el-menu-item>
         </el-menu>
         <section v-if="addTaskBoxVisible">
           <addTaskBox :addTaskBoxVisible="addTaskBoxVisible" @closeAddTask="closeAddTask"></addTaskBox>
+        </section>
+        <section v-if="addProjectBoxVisible">
+          <addProjectBox :addProjectBoxVisible="addProjectBoxVisible" @closeAddProject="closeAddProject"></addProjectBox>
         </section>
         <el-divider class="menu-divider"></el-divider>
       </el-main>
@@ -26,12 +29,14 @@
 
 <script>
 import addTaskBox from '@/components/addTaskBox'
+import addProjectBox from '@/components/addProjectBox'
 
 export default {
   name: 'leftMenu',
   data () {
     return {
-      addTaskBoxVisible: false
+      addTaskBoxVisible: false,
+      addProjectBoxVisible: false
     }
   },
   methods: {
@@ -41,10 +46,18 @@ export default {
     },
     closeAddTask() { // 关闭添加任务的dialog
       this.addTaskBoxVisible = false;
+    },
+    controlAddProject() {
+      this.addProjectBoxVisible = true;
+      console.log(this.addProjectBoxVisible);
+    },
+    closeAddProject() { // 关闭添加项目的dialog
+      this.addProjectBoxVisible = false;
     }
   },
   components: {
-    addTaskBox
+    addTaskBox,
+    addProjectBox
   }
 }
 </script>
@@ -85,7 +98,7 @@ export default {
   font-size: 16px;
   transition: 1s;
 }
-.addBtn:hover {
+.add-btn:hover {
   transform: rotate(-90deg) scale(1.2);
   color: red;
 }

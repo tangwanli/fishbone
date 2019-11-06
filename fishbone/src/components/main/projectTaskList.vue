@@ -21,7 +21,7 @@ export default {
       msg: 'Welcome to Your Vue.js App',
       projectTaskList: [], // 核心还是这个变量，来显示所以的数据
       url: '',
-      tableCol: [{prop: 'task_name',label: '任务名',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'manager.nick_name',label: '负责人',width: '80'},{prop: 'plan_start_date',label: '开始',width: '100'},{prop: 'plan_end_date',label: '结束',width: '100'},{prop: 'status',label: '阶段',width: '80'},{prop: 'priority',label: '优先级',width: '80'},{prop: 'progress_percent',label: '进度',width: '80'},{prop: 'content',label: '内容简介',width: '800'}],
+      tableCol: [{prop: 'task_name',label: '任务名',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'manager.nick_name',label: '负责人',width: '80'},{prop: 'plan_start_date',label: '开始',width: '100'},{prop: 'plan_end_date',label: '结束',width: '100'},{prop: 'priority',label: '优先级',width: '80'},{prop: 'progress_percent',label: '进度',width: '80'},{prop: 'content',label: '内容简介',width: '800'}],
       isRouterAlive: true,
     }
   },

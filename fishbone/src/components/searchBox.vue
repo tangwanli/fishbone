@@ -59,7 +59,7 @@ export default {
         let index = this.tagArr.indexOf(tagName);
         this.tagArr.splice(index,1);
       } else {
-        if (this.aimPosition == 'cc_member' || this.aimPosition == 'partner' || this.tagArr.length == 0) { // cc_member就可以选择多个人，其它就只能选择一个人
+        if (this.aimPosition == 'cc_member' || this.aimPosition == 'partner' || this.tagArr.length == 0) { // cc_member和partner就可以选择多个人，其它就只能选择一个人
           this.tagArr.push(tagName);
         }
       }
