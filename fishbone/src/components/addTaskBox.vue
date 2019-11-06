@@ -1,6 +1,6 @@
 <template>
     <section id="addTaskBox">
-      <el-dialog :visible.sync="addTaskBoxVisible" :close-on-click-modal="false">
+      <el-dialog :visible.sync="addTaskBoxVisible" :close-on-click-modal="false" :show-close="false">
         <!-- dialog的头部 -->
         <el-row slot="title" class="dialogTitle">
           <el-col :span="5">

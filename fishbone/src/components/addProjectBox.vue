@@ -1,6 +1,6 @@
 <template>
     <section id="addProjectBox">
-      <el-dialog :visible.sync="addProjectBoxVisible" :close-on-click-modal="false">
+      <el-dialog :visible.sync="addProjectBoxVisible" :close-on-click-modal="false" :show-close="false">
           <!-- 外层dialog -->
         <!-- dialog的头部 -->
         <el-row slot="title" class="dialogTitle">
@@ -13,7 +13,7 @@
         </el-row>
 
         <!-- 内层dialog -->
-        <el-dialog :visible.sync="innerVisible" append-to-body center id="inner-dialog" :close-on-click-modal="false">
+        <el-dialog :visible.sync="innerVisible" append-to-body center id="inner-dialog" :close-on-click-modal="false" :show-close="false">
             <!-- 内部dialog的头部 -->
             <el-row slot="title" class="dialogTitle">
                 <el-col :span="5">
@@ -27,7 +27,7 @@
                     <el-input type="textarea" placeholder="请输入项目名字:" v-model="title" :autosize="{minRows: 1,maxRows: 1}" maxlength="100" show-word-limit></el-input>
                 </el-col>
                 <el-col>
-                    <el-input type="textarea" placeholder="请输入项目简介:" v-model="content" :autosize="{minRows: 3,maxRows: 3}" maxlength="500" show-word-limit></el-input>
+                    <el-input type="textarea" placeholder="请输入项目简介:" v-model="content" :autosize="{minRows: 10,maxRows: 10}" maxlength="500" show-word-limit></el-input>
                 </el-col>
             </el-row>
             <el-row class="managerBox">

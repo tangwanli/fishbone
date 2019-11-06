@@ -6,12 +6,13 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        taskListResData: []
-    }
+        login: false
+    },
     // mutations: {
-    //     setTaskListResData(state,resData) {
-    //         state.taskListResData = resData;
-    //         console.log(state.taskListResData.count);
+    //     loginSuccess(state) {
+    //         console.log('dsadsad');
+    //         state.login = true;
+    //         sessionStorage.setItem('login', true);
     //     }
     // }
 });

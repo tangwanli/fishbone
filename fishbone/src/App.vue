@@ -1,29 +1,53 @@
 <template>
   <el-container id="app">
     <!-- 左边侧边菜单 -->
-    <leftMenu></leftMenu>
+    <leftMenu v-if="isLogin"></leftMenu>
 
 
     <!-- 主内容区 -->
-    <el-main><router-view/></el-main> 
+    <el-main v-if="isLogin"><router-view/></el-main> 
+    <el-main v-if="isLogin ? false : true" style="padding:0;"><login @loginSuccess="loginSuccess"></login></el-main>
   </el-container>
 </template>
 
 <script>    
 import leftMenu from '@/components/leftMenu'
+import login from '@/components/login'
 
 export default {
   name: 'App',
   data () {
-    return {}
+    return {
+      isLogin: ''
+    }
   },
   mounted() {
+    // 暂时的获取验证码
+    // this.$ajax.post('http://172.26.142.82:8080/fish_boom/login?verifyCode=6xjf2', {
+    //   acco: 'Test4',
+    //   password: 123
+    // }).then((res) => {
+    //   console.log(res.data);
+    // });
     let doc = document,
         clientHeight = doc.documentElement.clientHeight;
         doc.querySelector("#app").style.height = clientHeight + 'px'; // 设置最外层元素高度
+
+    if (sessionStorage.getItem('login') == null) {
+      this.isLogin = false;
+    } else {
+      this.isLogin = true;
+    }
+  },
+  methods: {
+    loginSuccess() {
+      sessionStorage.setItem('login', true);
+      this.isLogin = true;
+    }
   },
   components: {
-    leftMenu
+    leftMenu,
+    login
   }
 }
 </script>
