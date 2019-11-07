@@ -2,7 +2,7 @@
   <el-container id="DetailTask">
     <el-header height="26px">
       <el-row class="task-header" type="flex" justify="space-between">
-        <el-col :span="21" class="task-title">{{taskInfo.code}} {{taskInfo.task_name}}</el-col>
+        <el-col :span="21" class="task-title">{{taskInfo.code}} {{taskInfo.name}}</el-col>
         <el-col :span="3" class="task-btn"><el-button @click="deleteTask" size="mini" type="danger" :round="true" plain>删除任务</el-button><i @click="closeTask" class="el-icon-close"></i></el-col>
       </el-row>
     </el-header>
@@ -39,7 +39,7 @@
           </el-col>
         </el-row>
         <el-row type="flex" justify="flex-start">
-          <el-col>创建：{{taskInfo.creator.nick_name}}</el-col>
+          <el-col>创建：{{taskInfo.creator}} {{taskInfo.creatDate}}</el-col>
         </el-row>
       </div>
 
@@ -65,11 +65,11 @@
             <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{plan_end_date}}</span>
           </el-col>
           <el-col :span="3">
-            <el-button @click="changeTaskStatus" v-if="taskStatus == 'waitting'" type="primary" round size="mini">开始解决</el-button>
-            <el-select @change="changeTaskProgress" v-if="taskStatus == 'running'" v-model="taskProgressInitValue" placeholder="0%" size="mini">
+            <el-button @click="changeTaskStatus" v-if="taskStatus == '等待'" type="primary" round size="mini">开始解决</el-button>
+            <el-select @change="changeTaskProgress" v-if="taskStatus == '进行中'" v-model="taskProgressInitValue" placeholder="0%" size="mini">
               <el-option v-for="percent in percentList" :value="percent" :label="percent"></el-option>
             </el-select>
-            <el-button v-if="taskStatus == 'finish'" round size="mini" disabled>已完成</el-button>
+            <el-button v-if="taskStatus == '完成'" round size="mini" disabled>已完成</el-button>
           </el-col>
         </el-row>
       </div>
@@ -118,7 +118,7 @@ export default {
       priorityInitValue: '', // 任务优先值处的默认值
       content: '',
       isDisableModifyContent: true, // 主内容区是否可修改
-      taskStatus: 'running',
+      taskStatus: '进行中',
       percentList: ['0%','10%','20%','30%','40%','50%','60%','70%','80%','90%','100%'],
       taskProgressInitValue: '', // 任务进度处的默认值
       activeName: 'first', // 这个是任务最下面标签的默认选中
@@ -138,7 +138,7 @@ export default {
         taskList = resData.list,
         taskId = this.$route.params.id;
     taskList.find((value,index,arr) => { // 找到对应的任务
-      if (value.task_id == taskId) {
+      if (value.id == taskId) {
         this.taskInfo = value;
         this.initData();
         this.initComment();
@@ -149,28 +149,30 @@ export default {
   methods: {
     initData() {
       this.saveTagArr(); // 这个只执行一次，即组件加载的时候，弄一个默认的
-      this.plan_start_date = this.taskInfo.plan_start_date;
-      this.plan_end_date = this.taskInfo.plan_end_date;
+      this.plan_start_date = this.taskInfo.creatDate;
+      this.plan_end_date = this.taskInfo.endDate;
       this.priorityInitValue = this.taskInfo.priority;
       this.content = this.taskInfo.content;
-      // this.taskStatus = this.taskInfo.status;
-      this.taskStatus = 'waitting';
-      this.task_id = this.taskInfo.task_id;
-      this.url = '/task/modify.json/' + this.task_id;
+      this.taskStatus = this.taskInfo.status;
+      this.task_id = this.taskInfo.id;
+      console.log('这个任务的id值为',this.task_id);
+      this.taskProgressInitValue = this.taskInfo.percent;
+      this.url = 'http://172.26.142.82:8080/fish_boom/task/update/' + this.task_id;
     },
     initComment() { // 初始化评论
-      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
+    // http://172.26.142.82:8080/fish_boom/getCaptcha
+      this.$ajax.get('http://172.26.142.82:8080/fish_boom/opera/list', {
         params: {
-          subject_id: this.task_id,
+          id: this.task_id,
           type: 'task'
         }
       }).then((res) => {
         let resData = res.data;
-        this.commentArr = resData.comment.map((value,index,arr) => {
+        this.commentArr = resData.list.map((value,index,arr) => {
           let temp = {
-            nick_name: value.creator.nick_name,
+            nick_name: value.creator,
             content: value.content,
-            comment_times: value.comment_times
+            comment_times: value.creatTime
           };
           return temp;
         });
@@ -179,40 +181,40 @@ export default {
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
       if (aimPosition == 'manager') { // 点开的为负责人\
           this.managerName = tagArr.length ? tagArr : ['未设置'];
-          this.$ajax.post(this.url, { // 修改任务负责人
-            manager_name: this.managerName[0] == '未设置' ? '' : this.managerName[0]
+          this.$ajax.put(this.url, { // 修改任务负责人
+            name: this.managerName[0] == '未设置' ? '' : this.managerName[0]
           });
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人\
           this.ccMembers = tagArr.length ? tagArr : ['未设置'];
-          this.$ajax.post(this.url, { // 修改任务负责人
-            cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+          this.$ajax.put(this.url, { // 修改任务负责人
+            cc: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
           });
       }
       if (aimPosition == 'project') { 
           this.projectName = tagArr.length ? tagArr : ['未设置'];
-          this.$ajax.post(this.url, { // 修改任务负责人
+          this.$ajax.put(this.url, { // 修改任务负责人
             project_name: this.projectName[0] == '未设置' ? '' : this.projectName[0]
           });
       }
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
-      let managerName2 = this.taskInfo.manager.nick_name;
-      let projectName2 = this.taskInfo.project.project_name;
-      let ccMembers2 = this.taskInfo.cc_member.map((value,index,arr) => {
-        return value.nick_name;
-      });
-      if (managerName2) {
+      if (this.taskInfo.ff.length != 0) {
+        let managerName2 = this.taskInfo.ff[0].name; // 这里先显示一个人名
         let temp = [];
         temp.push(managerName2);
         this.managerName = temp;
       }
-      if (projectName2) {
+      if (this.taskInfo.project != null) {
+        let projectName2 = this.taskInfo.project.name;
         let temp = [];
         temp.push(projectName2);
         this.projectName = temp;
       }
-      if (ccMembers2) {
+      if (this.taskInfo.cc.length != 0) {
+        let ccMembers2 = this.taskInfo.cc.map((value,index,arr) => {
+          return value.name;
+        });
         this.ccMembers = ccMembers2;
       }
     },
@@ -238,27 +240,27 @@ export default {
       if (this.ccMembers.length == 0) {
         this.ccMembers.push('未设置');
       }
-      this.$ajax.post(this.url, { // 修改任务负责人
+      this.$ajax.put(this.url, { // 修改任务负责人
         cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
       });
     },
     changeStartDate(date) { // 修改任务的开始日期
       let resDate = this.formatDate(new Date(date));
-      this.$ajax.post(this.url, { // 修改任务负责人
-        plan_start_date: resDate
+      this.$ajax.put(this.url, { // 修改任务负责人
+        startDate: resDate
       });
     },
     changeEndDate(date) { // 修改任务的结束日期
       let resDate = this.formatDate(new Date(date));
-      this.$ajax.post(this.url, {
-        plan_end_date: resDate
+      this.$ajax.put(this.url, {
+        endDate: resDate
       });
     },
     formatDate(date) {
       let year = date.getFullYear(),
           month = date.getMonth() + 1,
           day = date.getDate(),
-          hour = date.getHours(),
+          hour = date.getHours() < 10 ? ('0' + date.getHours()) : date.getHours(),
           minute = date.getMinutes() < 10 ? ('0' + date.getMinutes()) : date.getMinutes(),
           second = date.getSeconds() < 10 ? ('0' + date.getSeconds()) : date.getSeconds();
           month = month < 10 ? ('0' + month) : month;
@@ -267,32 +269,31 @@ export default {
       // ' 00:00:00'
     },
     changePriority(value) { // 修改任务优先级
-      this.$ajax.post(this.url, {
+      this.$ajax.put(this.url, {
         priority: value
       });
     },
     changeContent() { // 修改任务内容
-      this.$ajax.post(this.url, {
+      this.$ajax.put(this.url, {
         content: this.content
       });
       this.isDisableModifyContent = true;
     },
     changeTaskStatus() { // 改变任务的状态，从开始准备到进行中
-      this.taskStatus = 'running';
-      this.$ajax.post(this.url, {
-        status: 'running'
+      this.taskStatus = '进行中';
+      this.$ajax.put(this.url, {
+        status: '进行中'
       });
     },
     changeTaskProgress(value) { // 改变任务进度
       if (value == '100%') {
-        this.taskStatus = 'finish';
-        this.$ajax.post(this.url, {
-          progress_percent: value,
-          status: 'finish'
+        this.taskStatus = '完成';
+        this.$ajax.put(this.url, {
+          percent: value
         });
       } else {
-        this.$ajax.post(this.url, {
-          progress_percent: value
+        this.$ajax.put(this.url, {
+          percent: value
         });
       }
     },
@@ -304,23 +305,26 @@ export default {
             comment_times: this.formatDate(new Date())
         };
         this.commentArr.push(temp);
-        this.$ajax.post(this.url, {
+        this.$ajax.put('http://172.26.142.82:8080/fish_boom/opera/add', {
+            subject_id: this.task_id,
             content: this.commentContent,
             type: 'task'
         });
         this.commentContent = '';
       }
-      
     },
     closeTask() { // 关闭任务
       let path = this.$route.path.replace('/' + this.$route.params.id, '');
       this.$router.push(path);
+      this.$emit('reloadHome');
+      console.log('执行触发reload2');
     },
     deleteTask() { // 删除任务
-      this.closeTask();
-      this.$ajax.delete(this.url);
+      console.log('这里还看得到这个吗',this.task_id);
+      this.$ajax.delete('http://172.26.142.82:8080/fish_boom/task/delete/' + this.task_id).then((res) => {
+        this.closeTask();
+      });
     }
-
   },
   components: {
     searchBox

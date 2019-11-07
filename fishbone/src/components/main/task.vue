@@ -27,10 +27,10 @@
           </el-row>
           <!-- 整个任务列表的列表部分 -->
           <el-menu background-color="#fff" text-color="#2c3e50" :router="true">
-            <el-menu-item @click="reload" :index="'/task/' + item.task_id" v-for="item in taskList">
+            <el-menu-item @click="reload" :index="'/task/' + item.id" v-for="item in taskList">
               <div class="first-line">
-                <span>{{item.task_name}}</span>
-                <span :class="isOverDue(item.plan_end_date) ? 'baseColor' : 'redColor'">{{item.plan_end_date}}</span>
+                <span>{{item.name}}</span>
+                <span :class="isOverDue(item.endDate) ? 'baseColor' : 'redColor'">{{item.endDate}}</span>
               </div>
             </el-menu-item>
           </el-menu>

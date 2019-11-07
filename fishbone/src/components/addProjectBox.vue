@@ -143,7 +143,7 @@ export default {
       let year = date.getFullYear(),
           month = date.getMonth() + 1,
           day = date.getDate(),
-          hour = date.getHours(),
+          hour = date.getHours() < 10 ? ('0' + date.getHours()) : date.getHours(),
           minute = date.getMinutes() < 10 ? ('0' + date.getMinutes()) : date.getMinutes(),
           second = date.getSeconds() < 10 ? ('0' + date.getSeconds()) : date.getSeconds();
           month = month < 10 ? ('0' + month) : month;

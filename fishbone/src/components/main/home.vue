@@ -4,10 +4,10 @@
     <el-col :span="6" class="home-task-list">
       <header>待办 [ {{taskCount}} ]</header>
       <el-menu background-color="#fff" text-color="#2c3e50" :router="true">
-        <el-menu-item @click="reload" :index="'/home/' + item.task_id" v-for="item in taskList">
+        <el-menu-item @click="reload" :index="'/home/' + item.id" v-for="item in taskList">
           <div class="first-line">
-            <span>{{item.task_name}}</span>
-            <span :class="isOverDue(item.plan_end_date) ? 'baseColor' : 'redColor'">{{item.plan_end_date}}</span>
+            <span>{{item.name}}</span>
+            <span :class="isOverDue(item.endDate) ? 'baseColor' : 'redColor'">{{item.endDate}}</span>
           </div>
         </el-menu-item>
       </el-menu>
@@ -15,8 +15,8 @@
     <!-- 项目 -->
     <el-col :span="6" class="home-project-list">
       <header>项目 [ {{projectCount}} ]</header>
-      <el-menu background-color="#fff" text-color="#2c3e50">
-        <el-menu-item index="1" v-for="item in projectList">
+      <el-menu background-color="#fff" text-color="#2c3e50" :router="true">
+        <el-menu-item  :index="'/project'" v-for="item in projectList">
           <div class="first-line">
             <span>{{item.name}}</span>
             <span>{{item.percent}}</span>
@@ -29,7 +29,7 @@
       </el-menu>
     </el-col>
     
-    <router-view v-if="isRouterAlive"/>
+    <router-view @reloadHome="reloadHome" v-if="isRouterAlive"/>
   </el-row>
 </template>
 
@@ -42,15 +42,17 @@ export default {
       taskList: [],
       projectCount: 1,
       projectList: [],
-      isRouterAlive: true
+      isRouterAlive: true,
+      isRouterAlive2: true
     }
   },
   created() {
     // 获取任务列表
-    this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', {
+    // http://172.26.142.82:8080/fish_boom/getCaptcha
+    this.$ajax.get('http://172.26.142.82:8080/fish_boom/task/list', {
       params: {
         start: 0,
-        limit: 30,
+        size: 30,
         sorters: {"column":"last_up_date","direction":"desc"},
         task_type: 1,
         status: "running"
@@ -91,6 +93,10 @@ export default {
      this.isRouterAlive = false;
      console.log(this.isRouterAlive);
      this.$nextTick(() => (this.isRouterAlive = true));
+   },
+   reloadHome () {
+     this.$emit('reloadHome2');
+     console.log('进入reload2');
    }
   }
 }

@@ -5,7 +5,7 @@
 
 
     <!-- 主内容区 -->
-    <el-main v-if="isLogin"><router-view/></el-main> 
+    <el-main v-if="isLogin"><router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2"/></el-main> 
     <el-main v-if="isLogin ? false : true" style="padding:0;"><login @loginSuccess="loginSuccess"></login></el-main>
   </el-container>
 </template>
@@ -18,7 +18,8 @@ export default {
   name: 'App',
   data () {
     return {
-      isLogin: ''
+      isLogin: '',
+      isRouterAliveTop: true
     }
   },
   mounted() {
@@ -43,6 +44,11 @@ export default {
     loginSuccess() {
       sessionStorage.setItem('login', true);
       this.isLogin = true;
+    },
+    reloadHome2 () {
+      this.isRouterAliveTop = false;
+      this.$nextTick(() => (this.isRouterAliveTop = true));
+      console.log('reloadHome3333333333');
     }
   },
   components: {

@@ -11,6 +11,7 @@ import './assets/css/app.css'
 
 Vue.use(ElementUI);
 Vue.prototype.$ajax= axios; // 把axios写在Vue的属性上，在其它组件中，通过this.$ajax来使用axios
+axios.defaults.withCredentials = true;
 Vue.config.productionTip = false;
 
 import Router from 'vue-router'

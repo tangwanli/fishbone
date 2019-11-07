@@ -15,9 +15,9 @@
             </el-input>
         </el-col>
         <el-col :span="20">
-            <el-input type="text" placeholder="验证码" v-model="verify" clearable>
-                <div slot="prepend" class="pre-label">验证码：</div>
-                <div slot="append">验证码</div>
+            <el-input type="text" placeholder="验证码" v-model="verify">
+                <!-- <div slot="prepend" class="pre-label">验证码：</div> -->
+                <div class="verifyBox" slot="append" @click="getVerify"><img :src="imgSrc" alt=""></div>
             </el-input>
         </el-col>
         <el-col :span="20">
@@ -35,12 +35,35 @@ export default {
     return {
         username: '',
         password: '',
-        verify: ''
+        verify: '',
+        imgSrc: ''
     }
   },
+  created() {
+      this.getVerify();
+  },
   methods: {
+      getVerify() { // 获取验证码
+        this.$ajax({method:'get',url:'http://172.26.142.82:8080/fish_boom/getCaptcha',responseType:'blob'}).then((res) => {
+          const src = window.URL.createObjectURL(res.data);//这里也是关键,调用window的这个方法URL方法
+          this.imgSrc = src;
+          console.log(src);
+        });
+      },
       login() {
-          this.$emit('loginSuccess');
+          this.$ajax.post('http://172.26.142.82:8080/fish_boom/login?verifyCode=' + this.verify, {
+              acco: this.username,
+              password: this.password
+          }).then((res) => {
+              console.log(res.data);
+              if (res.data.code == 0) {
+                  sessionStorage.setItem('userName',res.data.list.name);
+                  this.$emit('loginSuccess');
+              } else {
+                  alter('登陆失败！！！');
+              }
+          });
+        //   this.$emit('loginSuccess');
       }
   }
 }
@@ -86,5 +109,12 @@ export default {
 }
 #login .login-box .el-input__inner:hover {
     box-shadow: 0 0 2px rgb(73, 168, 21);
+}
+#login .el-input-group__append {
+    /* display: inline-block; */
+    width: 130px;
+    height: 80px;
+    padding: 0;
+    cursor: pointer;
 }
 </style>

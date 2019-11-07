@@ -9,7 +9,7 @@
           <el-menu-item index="/home"><i class="el-icon-s-home"></i>首页</el-menu-item>
           <el-menu-item index="/task"><i class="el-icon-s-order"></i>任务<i @click="controlAddTask" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
           <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目<i @click="controlAddProject" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
-          <el-menu-item index="4"><i class="el-icon-date"></i>日程</el-menu-item>
+          <el-menu-item index="/schedule"><i class="el-icon-date"></i>日程</el-menu-item>
         </el-menu>
         <section v-if="addTaskBoxVisible">
           <addTaskBox :addTaskBoxVisible="addTaskBoxVisible" @closeAddTask="closeAddTask"></addTaskBox>
@@ -22,7 +22,7 @@
 
 
       <el-footer>
-        <el-avatar>我</el-avatar>
+        <el-avatar>{{userName}}</el-avatar>
       </el-footer>
     </el-aside>
 </template>
@@ -36,8 +36,14 @@ export default {
   data () {
     return {
       addTaskBoxVisible: false,
-      addProjectBoxVisible: false
+      addProjectBoxVisible: false,
+      userName: ''
     }
+  },
+  created() {
+    let username = sessionStorage.getItem('userName'),
+        len = username.length - 1;
+        this.userName = username.charAt(len);
   },
   methods: {
     controlAddTask() {

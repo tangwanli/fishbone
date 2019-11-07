@@ -11,11 +11,12 @@ import projectDoc from '@/components/main/projectDoc'
 import projectChart from '@/components/main/projectChart'
 import projectCalendar from '@/components/main/projectCalendar'
 import projectTaskList from '@/components/main/projectTaskList'
+import schedule from '@/components/schedule'
 
 
 
 Vue.use(Router)
-
+// schedule
 
 export default new Router({
   mode: 'history',
@@ -26,6 +27,16 @@ export default new Router({
       component: home,
       children: [{
         path: '/home/:id',
+        name: 'DetailTask',
+        component: DetailTask
+      }]
+    },
+    {
+      path: '/schedule',
+      name: 'schedule',
+      component: schedule,
+      children: [{
+        path: '/schedule/:id',
         name: 'DetailTask',
         component: DetailTask
       }]
