@@ -2,7 +2,7 @@
   <el-container id="searchBox">
     <el-header height="110px">
       <span>已选择：</span>
-      <el-tag v-for="tagName in tagArr" closable size="mini" @close="closeTag(tagName)">{{tagName}}</el-tag>
+      <el-tag v-for="tag in tagArr" closable size="mini" @close="closeTag(tag.name)">{{tag.name}}</el-tag>
     </el-header>
 
     <el-main>
@@ -12,7 +12,7 @@
         </template>
       </el-input>
       <el-row class="info-list">
-        <el-col :class="isSelect(item.nick_name) ? 'selectColor' : 'normalColor'" :span="24" v-for="item in infoList"  @click.native="selectList(item.nick_name)">{{item.nick_name}}</el-col>
+        <el-col :class="isSelect(item.name) ? 'selectColor' : 'normalColor'" :span="24" v-for="item in infoList"  @click.native="selectList(item)">{{item.name}}</el-col>
       </el-row>
     </el-main>
 <!-- 现在要做的就是判断这些的选中和添加标签了 -->
@@ -43,29 +43,33 @@ export default {
   },
   methods: {
     closeTag(tagName) { // 关闭标签，触发的事件
-      let index = this.tagArr.indexOf(tagName);
-      this.tagArr.splice(index,1);
+      let index1 = 0;
+      this.tagArr.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.tagArr.splice(index1,1);
     },
     isSelect(tagName) { // 判断列表的哪个项是被选中的，改变它的样式
       let res = this.tagArr.find((value,index,arr) => {
-        if (value == tagName) {
+        if (value.name == tagName) {
           return true;
         }
       });
       return res ? true : false;
     },
-    selectList(tagName) { // 点击之后把对应的名字加入tagArr，并且改变颜色
-      if (this.isSelect(tagName)) { // 不管什么情况，点击被选中了的，都会直接被取消
-        let index = this.tagArr.indexOf(tagName);
-        this.tagArr.splice(index,1);
+    selectList(item) { // 点击之后把对应的名字加入tagArr，并且改变颜色
+      if (this.isSelect(item.name)) { // 不管什么情况，点击被选中了的，都会直接被取消
+        this.closeTag(item.name);
       } else {
         if (this.aimPosition == 'cc_member' || this.aimPosition == 'partner' || this.tagArr.length == 0) { // cc_member和partner就可以选择多个人，其它就只能选择一个人
-          this.tagArr.push(tagName);
+          this.tagArr.push(item);
         }
       }
     },
     initTag() {
-      if (this.tag2[0] != '未设置') {
+      if (this.tag2[0].name != '未设置') {
         this.tagArr = JSON.parse(JSON.stringify(this.tag2));
       } else {
         this.tagArr = [];
@@ -80,26 +84,36 @@ export default {
       //     this.infoList = resData.list;
       //   });
       // }
+      // http://172.26.142.82:8080/fish_boom/getCaptcha
       if (this.aimPosition == 'manager' || this.aimPosition == 'cc_member' || this.aimPosition == 'partner') { // 点开的为抄送人。这里这个partner为项目页独有的
-        this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/member_list.json', { 
+        this.$ajax.get('http://172.26.142.82:8080/fish_boom/user/list', {
+          params: {
+            size: 2000,
+            start: 0
+          } 
         }).then((res) => {
           let resData = res.data;
           this.infoList = resData.list;
+          console.log('获取所有联系人，返回的值为', res.data);
         });
       }
       if (this.aimPosition == 'project') { // 点开的为项目\
-        this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/all/project_list.json', { 
+        this.$ajax.get('http://172.26.142.82:8080/fish_boom/proj/list', { 
+          params: {
+            sorters: {"column":"last_up_date","direction":"desc"},
+            size: 200,
+            start: 0,
+            status: 'all'
+          }
         }).then((res) => {
           let resData = res.data;
-          this.infoList = resData.list.map((value,index,arr) => { // 将value.project_name赋值给value.nick_name；为了实现上面的数据统一
-            value.nick_name = value.project_name;
-            return value;
-          });;
+          this.infoList = resData.list;
+          console.log('获取所有项目，返回的值为', res.data);
         });
       }
     },
     searchInfo(ev) { // 搜索事件
-      if (this.input != '' || this.input != null) {
+      if (this.input == '' || this.input == null) {
         this.initList();
       } else {
         // if (this.aimPosition == 'manager') { // 点开的为负责人
@@ -114,9 +128,9 @@ export default {
         //   });
         // }
         if (this.aimPosition == 'manager' || this.aimPosition == 'cc_member' || this.aimPosition == 'partner') { // 点开的为负责人、抄送人或者普通成员
-          this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/member_list.json', { 
+          this.$ajax.get('http://172.26.142.82:8080/fish_boom/user/listByName', { 
             params: {
-              member_name: this.input
+              name: this.input
             }
           }).then((res) => {
             let resData = res.data;
@@ -124,16 +138,13 @@ export default {
           });
         }
         if (this.aimPosition == 'project') { // 点开的为项目
-          this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/search/project_list.json', { 
+          this.$ajax.get('http://172.26.142.82:8080/fish_boom/proj/listByName', { 
             params: {
-              project_name: this.input
+              name: this.input
             }
           }).then((res) => {
             let resData = res.data;
-            this.infoList = resData.list.map((value,index,arr) => { // 将value.project_name赋值给value.nick_name；为了实现上面的数据统一
-              value.nick_name = value.project_name;
-              return value;
-            });;
+            this.infoList = resData.list;
           });
         }
       }

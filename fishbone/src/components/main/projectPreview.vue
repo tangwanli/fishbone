@@ -14,21 +14,21 @@
           <el-row type="flex" justify="start">
               <el-col :span="2"><i class="el-icon-s-custom"></i> 项目经理 &nbsp;&nbsp;</el-col>
               <el-col :span="22">
-                <span class="selectIt" @click="controlBoxShow('manager')">{{managerName[0]}}</span>
+                <span class="selectIt" @click="controlBoxShow('manager')">{{managerName[0].name}}</span>
                 <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" aimPosition="manager" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
               </el-col>
           </el-row>
           <el-row type="flex" justify="start">
               <el-col :span="2"><i class="el-icon-user-solid"></i> 项目成员 &nbsp;&nbsp;</el-col>
               <el-col :span="22">
-                  <el-tag  @click.native="controlBoxShow('partner')" class="selectIt" v-for="tagName in partners" closable size="mini" @close="closeTag2(tagName)">{{tagName}}</el-tag>
+                  <el-tag  @click.native="controlBoxShow('partner')" class="selectIt" v-for="tag in partners" closable size="mini" @close="closeTag2(tag.name)">{{tag.name}}</el-tag>
                   <searchBox @cancelBox="cancelBox" v-if="isPartnerShowBox" :tag2="partners" aimPosition="partner" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
               </el-col>
           </el-row>
           <el-row type="flex" justify="start">
               <el-col :span="2"><i class="el-icon-user-solid"></i> 抄送人 &nbsp;&nbsp;</el-col>
               <el-col :span="22">
-                  <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeTag(tagName)">{{tagName}}</el-tag>
+                  <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tag in ccMembers" closable size="mini" @close="closeCcTag(tag.name)">{{tag.name}}</el-tag>
                   <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
               </el-col>
           </el-row>
@@ -90,9 +90,9 @@ export default {
       isManagerShowBox: false,
       isCcShowBox: false,
       isPartnerShowBox: false,
-      managerName: ['未设置'],
-      partners: ['未设置'],
-      ccMembers: ['未设置'],
+      managerName: [{name:'未设置',id:'12'}], // 这三个是几个可以弹出search-box的地方的默认值
+      partners: [{name:'未设置',id:'1221'}],
+      ccMembers: [{name:'未设置',id:'12'},{name:'未设置2',id:'123'}],
       isDisableModifyContent: true, // 主内容区是否可修改
       content: '',
       priorityInitValue: '',
@@ -126,7 +126,7 @@ export default {
         this.url = '/project/modify.json/' + this.$route.params.proId;
     },
     initComment() { // 初始化评论
-      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/comment/list.json', {
+      this.$ajax.get('http://172.26.142.82:8080/fish_boom/opera/list', {
         params: {
           subject_id: this.projectId,
           type: 'project'
@@ -135,9 +135,9 @@ export default {
         let resData = res.data;
         this.commentArr = resData.comment.map((value,index,arr) => {
           let temp = {
-            nick_name: value.creator.nick_name,
+            nick_name: value.creator,
             content: value.content,
-            comment_times: value.comment_times
+            comment_times: value.creatTime
           };
           return temp;
         });
@@ -170,42 +170,33 @@ export default {
     },
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
       if (aimPosition == 'manager') { // 点开的为负责人
-          this.managerName = tagArr.length ? tagArr : ['未设置'];
-          this.$ajax.post(this.url, { // 修改任务负责人
-            manager_name: this.managerName[0] == '未设置' ? '' : this.managerName[0]
+          this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
+          this.$ajax.put(this.url, { // 修改任务负责人
+            ff: this.managerName[0].name == '未设置' ? [] : this.managerName
           });
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人
-          this.ccMembers = tagArr.length ? tagArr : ['未设置'];
-          this.$ajax.post(this.url, { // 修改任务负责人
-            cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+          this.ccMembers = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
+          this.$ajax.put(this.url, { // 修改任务负责人
+            cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
           });
       }
       if (aimPosition == 'partner') { 
-          this.partners = tagArr.length ? tagArr : ['未设置'];
-          this.$ajax.post(this.url, { // 修改任务负责人
-            partner: this.partners[0] == '未设置' ? [''] : this.partners
+          this.partners = tagArr.length ? tagArr : [{name:'未设置',id:'1221'}];
+          this.$ajax.put(this.url, { // 修改任务负责人
+            partner: this.partners[0].name == '未设置' ? [] : this.partners
           });
       }
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
-      let managerName2 = this.projectInfo.manager.nick_name;
-      let partners2 = this.projectInfo.partner.map((value,index,arr) => {
-        return value.nick_name;
-      });;
-      let ccMembers2 = this.projectInfo.cc_member.map((value,index,arr) => {
-        return value.nick_name;
-      });
-      if (managerName2) {
-        let temp = [];
-        temp.push(managerName2);
-        this.managerName = temp;
+      if (this.taskInfo.ff.length != 0) {
+        this.managerName = this.projectInfo.ff;
       }
-      if (partners2) {
-        this.partners = partners2;
+      if (this.taskInfo.partners.length != 0) {
+        this.partners = this.projectInfo.partners;
       }
-      if (ccMembers2) {
-        this.ccMembers = ccMembers2;
+      if (this.taskInfo.cc.length != 0) {
+        this.ccMembers = this.projectInfo.cc;
       }
     },
     controlBoxShow(aimPosition) {
@@ -224,25 +215,36 @@ export default {
       this.isCcShowBox = false;
       this.isPartnerShowBox = false;
     },
-    closeTag(tagName) { // 关闭标签，触发的事件
-      let index = this.ccMembers.indexOf(tagName);
-      this.ccMembers.splice(index,1);
+    closeCcTag(tagName) { // 关闭标签，触发的事件
+      let index1 = 0;
+      this.ccMembers.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.ccMembers.splice(index1,1);
       if (this.ccMembers.length == 0) {
-        this.ccMembers.push('未设置');
+        this.ccMembers.push({name:'未设置',id:'12'});
       }
-      this.$ajax.post(this.url, { // 修改任务负责人
-        cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+      this.$ajax.put(this.url, { // 修改任务负责人
+            cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
       });
     },
     closeTag2(tagName) { // 关闭标签，触发的事件
-      let index = this.partners.indexOf(tagName);
-      this.partners.splice(index,1);
-      if (this.partners.length == 0) {
-        this.partners.push('未设置');
-      }
-      this.$ajax.post(this.url, { // 修改任务负责人
-        partner: this.partners[0] == '未设置' ? [''] : this.partners
+      let index1 = 0;
+      this.partners.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
       });
+      this.partners.splice(index1,1);
+      if (this.partners.length == 0) {
+        this.partners.push({name:'未设置',id:'12'});
+      }
+      this.$ajax.put(this.url, { // 修改任务负责人
+            partner: this.partners[0].name == '未设置' ? [] : this.partners
+      });
+      
     },
     changeContent() { // 修改项目描述
       this.$ajax.post(this.url, {
@@ -263,7 +265,8 @@ export default {
             comment_times: this.formatDate(new Date())
         };
         this.commentArr.push(temp);
-        this.$ajax.post(this.url, {
+        this.$ajax.put('http://172.26.142.82:8080/fish_boom/opera/add', {
+            subject_id: this.projectId,
             content: this.commentContent,
             type: 'project'
         });

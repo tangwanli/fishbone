@@ -11,13 +11,13 @@
     <el-main class='task-main'>
       <div class="main-header">
         <el-row type="flex" justify="flex-start">
-          <el-col :span="6">
-            负责人：<span class="selectIt" @click="controlBoxShow('manager')">{{managerName[0]}}</span>
-            <!-- 注，这里删了个 :active="activeName"，不知道这个是干嘛的，所以删了 -->
-            <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" aimPosition="manager" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
+          <el-col :span="12">
+            负责人：
+            <el-tag  @click.native="controlBoxShow('manager')" class="selectIt" v-for="tag in managerName" closable size="mini" @close="closeManagerTag(tag.name)">{{tag.name}}</el-tag>
+            <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" :aimPosition="isOnlyManager ? 'manager' : 'partner'" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
-          <el-col :span="18">抄送人：
-            <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeTag(tagName)">{{tagName}}</el-tag>
+          <el-col :span="12">抄送人：
+            <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tag in ccMembers" closable size="mini" @close="closeCcTag(tag.name)">{{tag.name}}</el-tag>
             <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
@@ -34,7 +34,7 @@
               <el-option v-for="priority in priorityList" :value="priority" :label="priority"></el-option>
             </el-select>
           </el-col>
-          <el-col :span="6">项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0]}}</span>
+          <el-col :span="6">项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0].name}}</span>
             <searchBox @cancelBox="cancelBox" v-if="isProShowBox" :tag2="projectName" aimPosition="project"  class="searchBox proSearchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
@@ -61,7 +61,7 @@
             <span class="baseColor">任务执行</span>
             <span class="baseColor">（{{taskStatus}}）</span>
             <br>
-            <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">{{managerName[0]}}</span>
+            <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">{{managerName[0].name}}</span>
             <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{plan_end_date}}</span>
           </el-col>
           <el-col :span="3">
@@ -106,9 +106,10 @@ export default {
   data () {
     return {
       url: '',
-      managerName: ['未设置'], // 这三个是几个可以弹出search-box的地方的默认值
-      projectName: ['未设置'],
-      ccMembers: ['未设置'],
+      managerName: [{name:'未设置',id:'12'}], // 这三个是几个可以弹出search-box的地方的默认值
+      projectName: [{name:'未设置',id:'1221'}],
+      ccMembers: [{name:'未设置',id:'12'}],
+      isOnlyManager: 'false', // 这个值用来判断是否只能有一个manager
       isManagerShowBox: false, // 控制3个地方search-box隐藏和显示
       isCcShowBox: false,
       isProShowBox: false,
@@ -126,6 +127,7 @@ export default {
       commentContent: '',
       taskInfo: {},
       task_id: '',
+      dsa: ''
     }
   },
   // beforeRouteUpdate(to, from, next) {  // 在路由进入这个组件之前调用。拦截所有非直接路径(比如已经打开了一个组件，再通过路由再打开这个组件)进来的请求，先跳转到直接路径，再进入
@@ -149,7 +151,7 @@ export default {
   methods: {
     initData() {
       this.saveTagArr(); // 这个只执行一次，即组件加载的时候，弄一个默认的
-      this.plan_start_date = this.taskInfo.creatDate;
+      this.plan_start_date = this.taskInfo.startDate;
       this.plan_end_date = this.taskInfo.endDate;
       this.priorityInitValue = this.taskInfo.priority;
       this.content = this.taskInfo.content;
@@ -179,43 +181,37 @@ export default {
       });
     },
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
-      if (aimPosition == 'manager') { // 点开的为负责人\
-          this.managerName = tagArr.length ? tagArr : ['未设置'];
+      console.log('提交保存之后的值',aimPosition, tagArr);
+      if (aimPosition == 'manager' || aimPosition == 'partner') { // 点开的为负责人\
+          this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
-            name: this.managerName[0] == '未设置' ? '' : this.managerName[0]
+            ff: this.managerName[0].name == '未设置' ? [] : this.managerName
           });
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人\
-          this.ccMembers = tagArr.length ? tagArr : ['未设置'];
+          this.ccMembers = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
-            cc: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+            cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
           });
       }
       if (aimPosition == 'project') { 
-          this.projectName = tagArr.length ? tagArr : ['未设置'];
+          this.projectName = tagArr.length ? tagArr : [{name:'未设置',id:'1221'}];
           this.$ajax.put(this.url, { // 修改任务负责人
-            project_name: this.projectName[0] == '未设置' ? '' : this.projectName[0]
+            project: this.projectName[0].name == '未设置' ? [] : this.projectName[0]
           });
       }
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
       if (this.taskInfo.ff.length != 0) {
-        let managerName2 = this.taskInfo.ff[0].name; // 这里先显示一个人名
-        let temp = [];
-        temp.push(managerName2);
-        this.managerName = temp;
+        this.managerName = this.taskInfo.ff;
       }
       if (this.taskInfo.project != null) {
-        let projectName2 = this.taskInfo.project.name;
         let temp = [];
-        temp.push(projectName2);
+        temp.push(this.taskInfo.project);
         this.projectName = temp;
       }
       if (this.taskInfo.cc.length != 0) {
-        let ccMembers2 = this.taskInfo.cc.map((value,index,arr) => {
-          return value.name;
-        });
-        this.ccMembers = ccMembers2;
+        this.ccMembers = this.taskInfo.cc;
       }
     },
     controlBoxShow(aimPosition) {
@@ -234,14 +230,34 @@ export default {
       this.isCcShowBox = false;
       this.isProShowBox = false;
     },
-    closeTag(tagName) { // 关闭标签，触发的事件
-      let index = this.ccMembers.indexOf(tagName);
-      this.ccMembers.splice(index,1);
-      if (this.ccMembers.length == 0) {
-        this.ccMembers.push('未设置');
+    closeManagerTag(tagName) { // 关闭标签，触发的事件
+      let index1 = 0;
+      this.managerName.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.managerName.splice(index1,1);
+      if (this.managerName.length == 0) {
+        this.managerName.push({name:'未设置',id:'12'});
       }
       this.$ajax.put(this.url, { // 修改任务负责人
-        cc_member: this.ccMembers[0] == '未设置' ? [''] : this.ccMembers
+            ff: this.managerName[0].name == '未设置' ? [] : this.managerName
+      });
+    },
+    closeCcTag(tagName) { // 关闭标签，触发的事件
+      let index1 = 0;
+      this.ccMembers.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.ccMembers.splice(index1,1);
+      if (this.ccMembers.length == 0) {
+        this.ccMembers.push({name:'未设置',id:'12'});
+      }
+      this.$ajax.put(this.url, { // 修改任务负责人
+            cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
       });
     },
     changeStartDate(date) { // 修改任务的开始日期

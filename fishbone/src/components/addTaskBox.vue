@@ -22,14 +22,14 @@
         <el-row class="managerBox">
           <el-col :span="24">
             负责人：
-            <el-tag  @click.native="controlBoxShow('manager')" class="selectIt" v-for="tagName in managerName" closable size="mini" @close="closeManagerTag(tagName)">{{tagName}}</el-tag>
+            <el-tag  @click.native="controlBoxShow('manager')" class="selectIt" v-for="tag in managerName" closable size="mini" @close="closeManagerTag(tag.name)">{{tag.name}}</el-tag>
             <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" :aimPosition="isOnlyManager ? 'manager' : 'partner'" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
         <el-row class="ccBox">
           <el-col :span="24">
             抄送人：
-            <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeCcTag(tagName)">{{tagName}}</el-tag>
+            <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tag in ccMembers" closable size="mini" @close="closeCcTag(tag.name)">{{tag.name}}</el-tag>
             <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
@@ -45,7 +45,7 @@
               <el-option v-for="priority in priorityList" :value="priority" :label="priority"></el-option>
             </el-select>
           </el-col>
-          <el-col :span="6" class="projectBox">项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0]}}</span>
+          <el-col :span="6" class="projectBox">项目：<span class="selectIt" @click="controlBoxShow('project')">{{projectName[0].name}}</span>
             <searchBox @cancelBox="cancelBox" v-if="isProShowBox" :tag2="projectName" aimPosition="project"  class="searchBox proSearchBox" @changeSearch="changeSearchInfo"></searchBox>
           </el-col>
         </el-row>
@@ -73,13 +73,13 @@ export default {
         typeInitValue: '', 
         title: '',
         content: '', // 任务的主内容
-        managerName: ['未设置'], // 这三个是几个可以弹出search-box的地方的默认值
-        projectName: ['未设置'],
-        ccMembers: ['未设置'],
+        managerName: [{name:'未设置',id:'12'}], // 这三个是几个可以弹出search-box的地方的默认值
+        projectName: [{name:'未设置',id:'1221'}],
+        ccMembers: [{name:'未设置',id:'12'},{name:'未设置2',id:'123'}],
+        isOnlyManager: 'false', // 用来判断负责人处是可以选择一个负责人还是可以多选负责人
         isManagerShowBox: false, // 控制3个地方search-box隐藏和显示
         isCcShowBox: false,
         isProShowBox: false,
-        isOnlyManager: true,  // 用来判断负责人处是可以选择一个负责人还是可以多选负责人
         plan_start_date: new Date(),
         plan_end_date: new Date(),
         priorityList: ['普通','重要','紧急','重要紧急'],
@@ -108,15 +108,14 @@ export default {
     },
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
       if (aimPosition == 'manager' || aimPosition == 'partner') { // 点开的为负责人\
-          this.managerName = tagArr.length ? tagArr : ['未设置'];
+          this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人\
-          this.ccMembers = tagArr.length ? tagArr : ['未设置'];
+          this.ccMembers = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
       }
       if (aimPosition == 'project') { 
-          this.projectName = tagArr.length ? tagArr : ['未设置'];
+          this.projectName = tagArr.length ? tagArr : [{name:'未设置',id:'1221'}];
       }
-      console.log(aimPosition,tagArr);
     },
     cancelBox() {
       this.isManagerShowBox = false;
@@ -124,17 +123,27 @@ export default {
       this.isProShowBox = false;
     },
     closeManagerTag(tagName) { // 关闭标签，触发的事件
-      let index = this.managerName.indexOf(tagName);
-      this.managerName.splice(index,1);
+      let index1 = 0;
+      this.managerName.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.managerName.splice(index1,1);
       if (this.managerName.length == 0) {
-        this.managerName.push('未设置');
+        this.managerName.push({name:'未设置',id:'12'});
       }
     },
     closeCcTag(tagName) { // 关闭标签，触发的事件
-      let index = this.ccMembers.indexOf(tagName);
-      this.ccMembers.splice(index,1);
+      let index1 = 0;
+      this.ccMembers.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.ccMembers.splice(index1,1);
       if (this.ccMembers.length == 0) {
-        this.ccMembers.push('未设置');
+        this.ccMembers.push({name:'未设置',id:'12'});
       }
     },
     formatDate(date) {
@@ -151,8 +160,8 @@ export default {
     },
     savaTaskAdd(){
       let manager_name = this.managerName,
-          cc_member = this.ccMembers,
-          project_name = this.projectName[0] == '未设置' ? '' : this.projectName[0],
+          cc_members = this.ccMembers,
+          project_name = this.projectName[0].name == '未设置' ? [] : this.projectName[0],
           plan_end_date = this.plan_end_date,
           plan_start_date = this.plan_start_date,
           priority = this.priorityInitValue,
@@ -162,15 +171,15 @@ export default {
       if (new Date(plan_start_date) > new Date(plan_end_date)) {
         alert('开始时间必须在结束时间之前');
       } else {
-        this.$ajax.post('task/add_task.json', {
-          manager_name: manager_name,
-          cc_member: cc_member,
-          project_name: project_name,
-          plan_end_date: this.formatDate(plan_end_date),
-          plan_start_date: this.formatDate(plan_start_date),
+        this.$ajax.post('http://172.26.142.82:8080/fish_boom/task/add', {
+          ff: manager_name[0].name == '未设置' ? [] : manager_name,
+          cc: cc_members[0].name == '未设置' ? [] : cc_members,
+          project: project_name,
+          endDate: this.formatDate(plan_end_date),
+          startDate: this.formatDate(plan_start_date),
           priority: priority,
           content: content,
-          title: title,
+          name: title,
           type: type
         }).then((res) => {
           console.log('添加成功返回');

@@ -67,7 +67,7 @@ export default {
     this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/project/project_list.json', {
       params: {
         sorters: {"column":"last_up_date","direction":"desc"},
-        limit: 20,
+        size: 20,
         start: 0,
         status: 'all'
       }

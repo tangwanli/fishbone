@@ -33,14 +33,14 @@
             <el-row class="managerBox">
                 <el-col :span="24">
                     项目经理：
-                    <el-tag  @click.native="controlBoxShow('manager')" class="selectIt" v-for="tagName in managerName" closable size="mini" @close="closeManagerTag(tagName)">{{tagName}}</el-tag>
+                    <el-tag  @click.native="controlBoxShow('manager')" class="selectIt" v-for="tag in managerName" closable size="mini" @close="closeManagerTag(tag.name)">{{tag.name}}</el-tag>
                     <searchBox @cancelBox="cancelBox" v-if="isManagerShowBox" :tag2="managerName" aimPosition="manager" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
                 </el-col>
             </el-row>
             <el-row class="ccBox">
                 <el-col :span="24">
                     抄送人：
-                    <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tagName in ccMembers" closable size="mini" @close="closeCcTag(tagName)">{{tagName}}</el-tag>
+                    <el-tag  @click.native="controlBoxShow('cc_member')" class="selectIt" v-for="tag in ccMembers" closable size="mini" @close="closeCcTag(tag.name)">{{tag.name}}</el-tag>
                     <searchBox @cancelBox="cancelBox" v-if="isCcShowBox" :tag2="ccMembers" aimPosition="cc_member" class="searchBox" @changeSearch="changeSearchInfo"></searchBox>
                 </el-col>
             </el-row>
@@ -80,12 +80,10 @@ export default {
     return {
         msg: 'show me this',
         innerVisible: false,
-        typeList: ['普通任务','批量任务'],
-        typeInitValue: '', 
         title: '', // 这里这个title为项目名字
         content: '', // 项目的主内容
-        managerName: ['未设置'], // 这三个是几个可以弹出search-box的地方的默认值
-        ccMembers: ['未设置'],
+        managerName: [{name:'未设置',id:'12'}], // 这三个是几个可以弹出search-box的地方的默认值
+        ccMembers: [{name:'未设置',id:'12'},{name:'未设置2',id:'123'}],
         isManagerShowBox: false, // 控制3个地方search-box隐藏和显示
         isCcShowBox: false,
         plan_start_date: new Date(),
@@ -114,10 +112,10 @@ export default {
     },
     changeSearchInfo(aimPosition, tagArr) {  // 这个主要是通过子组件里面触发的，来改变页面上面的，负责人、抄送人、项目信息
       if (aimPosition == 'manager') { // 点开的为负责人\
-          this.managerName = tagArr.length ? tagArr : ['未设置'];
+          this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人\
-          this.ccMembers = tagArr.length ? tagArr : ['未设置'];
+          this.ccMembers = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
       }
       console.log(aimPosition,tagArr);
     },
@@ -126,17 +124,27 @@ export default {
       this.isCcShowBox = false;
     },
     closeManagerTag(tagName) { // 关闭标签，触发的事件
-      let index = this.managerName.indexOf(tagName);
-      this.managerName.splice(index,1);
+      let index1 = 0;
+      this.managerName.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.managerName.splice(index1,1);
       if (this.managerName.length == 0) {
-        this.managerName.push('未设置');
+        this.managerName.push({name:'未设置',id:'12'});
       }
     },
     closeCcTag(tagName) { // 关闭标签，触发的事件
-      let index = this.ccMembers.indexOf(tagName);
-      this.ccMembers.splice(index,1);
+      let index1 = 0;
+      this.ccMembers.forEach((value,index,arr) => {
+        if (value.name == tagName) {
+          index1 = index;
+        }
+      });
+      this.ccMembers.splice(index1,1);
       if (this.ccMembers.length == 0) {
-        this.ccMembers.push('未设置');
+        this.ccMembers.push({name:'未设置',id:'12'});
       }
     },
     formatDate(date) {
@@ -152,8 +160,8 @@ export default {
       // ' 00:00:00'
     },
     savaProjectAdd(){
-      let manager_name = this.managerName[0] == '未设置' ? '' : this.projectName[0],
-          cc_member = this.ccMembers,
+      let manager_name = this.managerName,
+          cc_members = this.ccMembers,
           plan_end_date = this.plan_end_date,
           plan_start_date = this.plan_start_date,
           priority = this.priorityInitValue,
@@ -162,17 +170,17 @@ export default {
       if (new Date(plan_start_date) > new Date(plan_end_date)) {
         alert('开始时间必须在结束时间之前');
       } else {
-        if (manager_name == '') {
+        if (manager_name[0].name == '未设置') {
             alert('请添加项目经理，不然谁管啊！！！！！');
         } else {
-            this.$ajax.post('project/create.json', {
-                manager_name: manager_name,
-                cc_member: cc_member,
-                plan_end_date: this.formatDate(plan_end_date),
-                plan_start_date: this.formatDate(plan_start_date),
+            this.$ajax.post('http://172.26.142.82:8080/fish_boom/task/delete/', {
+                ff: manager_name,
+                cc: cc_members[0].name == '未设置' ? [] : cc_members,
+                endDate: this.formatDate(plan_end_date),
+                startDate: this.formatDate(plan_start_date),
                 priority: priority,
                 content: content,
-                title: title
+                name: title
             }).then((res) => {
               console.log('添加成功返回');
             });
