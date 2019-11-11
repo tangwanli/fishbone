@@ -1,11 +1,14 @@
 <template>
   <el-container id="app">
     <!-- 左边侧边菜单 -->
-    <leftMenu v-if="isLogin"></leftMenu>
+    <leftMenu @reloadHome2="reloadHome2" @logOut="logOut" v-if="isLogin"></leftMenu>
 
 
     <!-- 主内容区 -->
-    <el-main v-if="isLogin"><router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2"/></el-main> 
+    <el-main v-if="isLogin">
+      <transition name="main" mode='out-in'>
+        <router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2"/>
+      </transition></el-main> 
     <el-main v-if="isLogin ? false : true" style="padding:0;"><login @loginSuccess="loginSuccess"></login></el-main>
   </el-container>
 </template>
@@ -45,6 +48,11 @@ export default {
       sessionStorage.setItem('login', true);
       this.isLogin = true;
     },
+    logOut() {
+      console.log('进入最外层的logOut');
+      sessionStorage.setItem('login', false);
+      this.isLogin = false;
+    },
     reloadHome2 () {
       this.isRouterAliveTop = false;
       this.$nextTick(() => (this.isRouterAliveTop = true));
@@ -58,6 +66,31 @@ export default {
 }
 </script>
 <style>
+/* 组件过渡动画 */
+.main-leave {
+  opacity: 1;
+  transform: translateY(0);
+}
+.main-leave-to {
+  opacity: 0;
+  transform: translateY(-300px);
+}
+.main-leave-active {
+  transition: 1s;
+}
+.main-enter {
+  transform: translateY(300px);
+  opacity: 0;
+}
+.main-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+.main-enter-active {
+  transition: 1s;
+}
+
+/* 其余 */
 #app {
   height: 100%;
   background: rgb(238,238,238);

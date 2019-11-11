@@ -42,7 +42,7 @@
           </el-row>
           <el-row type="flex" justify="start">
               <el-col :span="24" class="creatorBox">
-                  创建人：{{creator}}
+                  创建人：{{creator}} {{creatDate}}
               </el-col>
           </el-row>
           <el-row class="projectContent" type="flex" justify="start">
@@ -98,6 +98,7 @@ export default {
       priorityInitValue: '',
       priorityList: ['低','普通','高','非常重要'],
       creator: '',
+      creatDate: '',
       activeName: 'first', // 这个是任务最下面标签的默认选中
       projectId: '',
       commentArr: [],
@@ -112,28 +113,31 @@ export default {
   },
   methods: {
     initData() { // 初始化所有数据
+    console.log(this.projectInfo);
         this.saveTagArr(); // 这个只执行一次，即组件加载的时候，弄一个默认的
         let projectInfo = this.projectInfo;
         this.projectName = projectInfo.name;
         this.code = projectInfo.code;
         this.percent = projectInfo.percent;
-        this.plan_start_date = projectInfo.plan_start_date;
-        this.plan_end_date = projectInfo.plan_end_date;
+        this.plan_start_date = projectInfo.startDate;
+        this.plan_end_date = projectInfo.endDate;
         this.content = projectInfo.content;
         this.priorityInitValue = projectInfo.priority;
         this.creator = projectInfo.creator;
+        this.creatDate = projectInfo.creatDate;
         this.projectId = this.$route.params.proId;
-        this.url = '/project/modify.json/' + this.$route.params.proId;
+        this.url = '/proj/update/' + this.$route.params.proId;
+        console.log('数据初始化完了');
     },
     initComment() { // 初始化评论
-      this.$ajax.get('http://172.26.142.82:8080/fish_boom/opera/list', {
+      this.$ajax.get('opera/list', {
         params: {
-          subject_id: this.projectId,
+          id: this.projectId,
           type: 'project'
         }
       }).then((res) => {
         let resData = res.data;
-        this.commentArr = resData.comment.map((value,index,arr) => {
+        this.commentArr = resData.list.map((value,index,arr) => {
           let temp = {
             nick_name: value.creator,
             content: value.content,
@@ -146,14 +150,14 @@ export default {
     },
     changeStartDate(date) { // 修改任务的开始日期
         let resDate = this.formatDate(new Date(date));
-        this.$ajax.post(this.url, { // 修改任务负责人
-            plan_start_date: resDate
+        this.$ajax.put(this.url, { // 修改任务负责人
+            startDate: resDate
         });
     },
     changeEndDate(date) { // 修改任务的结束日期
         let resDate = this.formatDate(new Date(date));
-        this.$ajax.post(this.url, {
-            plan_end_date: resDate
+        this.$ajax.put(this.url, {
+            endDate: resDate
         });
     },
     formatDate(date) {
@@ -172,7 +176,7 @@ export default {
       if (aimPosition == 'manager') { // 点开的为负责人
           this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
-            ff: this.managerName[0].name == '未设置' ? [] : this.managerName
+            pm: this.managerName[0].name == '未设置' ? [] : this.managerName[0]
           });
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人
@@ -189,13 +193,17 @@ export default {
       }
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
-      if (this.taskInfo.ff.length != 0) {
-        this.managerName = this.projectInfo.ff;
+      if (this.projectInfo.pm != {}) {
+        let temp = [];
+        temp.push(this.projectInfo.pm)
+        console.log('这里这个值来看一下',temp);
+        this.managerName = temp;
+        console.log('这里这个值来看一下',this.projectInfo.pm);
       }
-      if (this.taskInfo.partners.length != 0) {
-        this.partners = this.projectInfo.partners;
+      if (this.projectInfo.partner.length != 0) {
+        this.partners = this.projectInfo.partner;
       }
-      if (this.taskInfo.cc.length != 0) {
+      if (this.projectInfo.cc.length != 0) {
         this.ccMembers = this.projectInfo.cc;
       }
     },
@@ -247,13 +255,13 @@ export default {
       
     },
     changeContent() { // 修改项目描述
-      this.$ajax.post(this.url, {
+      this.$ajax.put(this.url, {
         content: this.content
       });
       this.isDisableModifyContent = true;
     },
     changePriority(value) { // 修改任务优先级
-      this.$ajax.post(this.url, {
+      this.$ajax.put(this.url, {
         priority: value
       });
     },
@@ -265,7 +273,7 @@ export default {
             comment_times: this.formatDate(new Date())
         };
         this.commentArr.push(temp);
-        this.$ajax.put('http://172.26.142.82:8080/fish_boom/opera/add', {
+        this.$ajax.post('opera/add', {
             subject_id: this.projectId,
             content: this.commentContent,
             type: 'project'

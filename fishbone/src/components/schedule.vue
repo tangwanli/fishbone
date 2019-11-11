@@ -29,29 +29,22 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App',
       // value: new Date(),
-      value: '2019-5',
+      value: new Date(),
       taskList: [],
       isRouterAlive: true,
     }
   },
   props: ['projectInfo'], // 这个组件里面，projectInfo唯一的作用就是读取项目id出来，然后来获取任务列表，在项目id可以获取的情况下，这个是多余的
   created() {
-    console.log('进来projectCalendar了');
+    console.log('进来calendar了');
     this.getTaskList(); 
   },
   methods: {
     getTaskList() { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
-      this.url = 'http://rap2api.taobao.org/app/mock/232839/task/task_list.json' + this.$route.params.proId;
-    //   this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', { // 这里是应该用this.url的
-    //   }).then((res) => {
-    //     let resData = res.data;
-    //     sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
-    //     this.taskList = resData.list;
-    //   });
-        this.$ajax.get('http://172.26.142.82:8080/fish_boom/task/list', {
+        this.$ajax.get('task/list', {
         params: {
             start: 0,
-            size: 30,
+            size: 300,
             sorters: {"column":"last_up_date","direction":"desc"},
             task_type: 0,
             status: "running"
@@ -114,11 +107,11 @@ export default {
   height: 200px;
   background: red;
 } */
-#projectCalendar .el-calendar .el-calendar-table__row td .el-calendar-day {
+#schedule .el-calendar .el-calendar-table__row td .el-calendar-day {
   height: 80px;
   overflow: hidden;
 }
-#projectCalendar .el-calendar .el-calendar-table__row td .el-calendar-day:hover {
+#schedule .el-calendar .el-calendar-table__row td .el-calendar-day:hover {
   overflow: auto;
 }
 </style>

@@ -17,7 +17,7 @@
         </el-calendar>
       </el-col>
 
-      <el-col><router-view v-if="isRouterAlive"/></el-col>
+      <el-col><router-view @reloadHome="reloadHome" v-if="isRouterAlive"/></el-col>
     </el-row>
   </section>
 </template>
@@ -29,7 +29,7 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App',
       // value: new Date(),
-      value: '2019-5',
+      value: new Date(),
       projectTaskList: [],
       isRouterAlive: true,
     }
@@ -41,8 +41,11 @@ export default {
   },
   methods: {
     getProjectTaskList() { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
-      this.url = 'http://rap2api.taobao.org/app/mock/232839/task/task_list.json' + this.$route.params.proId;
-      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', { // 这里是应该用this.url的
+      this.url = 'proj/listTask';
+      this.$ajax.get(this.url, { // 这里是应该用this.url的
+        params: {
+          pid: this.$route.params.proId
+        }
       }).then((res) => {
         let resData = res.data;
         sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
@@ -77,7 +80,11 @@ export default {
     reload () {
      this.isRouterAlive = false;
      this.$nextTick(() => (this.isRouterAlive = true));
-   }
+    },
+    reloadHome () {
+      this.$emit('reloadHome2');
+      console.log('进入reload2');
+    }
   }
 }
 </script>

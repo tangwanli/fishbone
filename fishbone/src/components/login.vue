@@ -44,14 +44,14 @@ export default {
   },
   methods: {
       getVerify() { // 获取验证码
-        this.$ajax({method:'get',url:'http://172.26.142.82:8080/fish_boom/getCaptcha',responseType:'blob'}).then((res) => {
+        this.$ajax({method:'get',url:'getCaptcha',responseType:'blob'}).then((res) => {
           const src = window.URL.createObjectURL(res.data);//这里也是关键,调用window的这个方法URL方法
           this.imgSrc = src;
           console.log(src);
         });
       },
       login() {
-          this.$ajax.post('http://172.26.142.82:8080/fish_boom/login?verifyCode=' + this.verify, {
+          this.$ajax.post('login?verifyCode=' + this.verify, {
               acco: this.username,
               password: this.password
           }).then((res) => {
@@ -60,7 +60,7 @@ export default {
                   sessionStorage.setItem('userName',res.data.list.name);
                   this.$emit('loginSuccess');
               } else {
-                  alter('登陆失败！！！');
+                  alert(res.data.message);
               }
           });
         //   this.$emit('loginSuccess');

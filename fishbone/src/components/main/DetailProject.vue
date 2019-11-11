@@ -12,7 +12,7 @@
     </el-header>
 
     <el-main>
-      <router-view :projectInfo="projectInfo"/>
+      <router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2" :projectInfo="projectInfo"/>
     </el-main>
   </el-container>
 </template>
@@ -23,19 +23,20 @@ export default {
   data () {
     return {
       msg: '开始游戏',
-      btnValue: [{btnName: '概况', isSelect: true},{btnName: '甘特图', isSelect: false},{btnName: '任务列表', isSelect: false},{btnName: '日历', isSelect: false},{btnName: '文档', isSelect: false}], // 上面的几个按钮的名字
+      btnValue: [{btnName: '概况', isSelect: true},{btnName: '任务列表', isSelect: false},{btnName: '日历', isSelect: false},{btnName: '文档', isSelect: false}], // 上面的几个按钮的名字
       projectInfo: [],
       projectId: '1',
-      url: ''
+      url: '',
+      isRouterAliveTop: true
     }
   },
   created() {
     let resData = JSON.parse(sessionStorage.getItem('projectResList')),
         projectList = resData.list;
     this.projectId = this.$route.params.proId;
-    this.url = '/project/modify.json/' + this.$route.params.proId;
+    this.url = '/proj/delete/' + this.$route.params.proId;
     projectList.find((value,index,arr) => { // 找到对应的任务
-      if (value.project_id == this.projectId) {
+      if (value.id == this.projectId) {
         this.projectInfo = value;
         return true;
       }
@@ -64,6 +65,11 @@ export default {
       let path = '/project';
       this.$router.push(path);
       this.$ajax.delete(this.url);
+    },
+    reloadHome2 () {
+      this.isRouterAliveTop = false;
+      this.$nextTick(() => (this.isRouterAliveTop = true));
+      console.log('reloadHome3333333333');
     }
   }
 }

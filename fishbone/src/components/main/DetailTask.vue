@@ -159,11 +159,11 @@ export default {
       this.task_id = this.taskInfo.id;
       console.log('这个任务的id值为',this.task_id);
       this.taskProgressInitValue = this.taskInfo.percent;
-      this.url = 'http://172.26.142.82:8080/fish_boom/task/update/' + this.task_id;
+      this.url = 'task/update/' + this.task_id;
     },
     initComment() { // 初始化评论
     // http://172.26.142.82:8080/fish_boom/getCaptcha
-      this.$ajax.get('http://172.26.142.82:8080/fish_boom/opera/list', {
+      this.$ajax.get('opera/list', {
         params: {
           id: this.task_id,
           type: 'task'
@@ -321,7 +321,7 @@ export default {
             comment_times: this.formatDate(new Date())
         };
         this.commentArr.push(temp);
-        this.$ajax.put('http://172.26.142.82:8080/fish_boom/opera/add', {
+        this.$ajax.put('opera/add', {
             subject_id: this.task_id,
             content: this.commentContent,
             type: 'task'
@@ -337,7 +337,7 @@ export default {
     },
     deleteTask() { // 删除任务
       console.log('这里还看得到这个吗',this.task_id);
-      this.$ajax.delete('http://172.26.142.82:8080/fish_boom/task/delete/' + this.task_id).then((res) => {
+      this.$ajax.delete('task/delete/' + this.task_id).then((res) => {
         this.closeTask();
       });
     }

@@ -30,7 +30,7 @@ export default {
       currentPage: 1,
       projectList: [],
       count: 100, // 所有数据的总数
-      tableCol: [{prop: 'name',label: '名称',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'manager.nick_name',label: '负责人',width: '80'},{prop: 'plan_start_date',label: '开始',width: '100'},{prop: 'plan_end_date',label: '结束',width: '100'},{prop: 'percent',label: '进度',width: '80'},{prop: 'last_comment',label: '最新进展',width: '800'}],
+      tableCol: [{prop: 'name',label: '名称',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'pm.name',label: '负责人',width: '80'},{prop: 'startDate',label: '开始',width: '100'},{prop: 'endDate',label: '结束',width: '100'},{prop: 'percent',label: '进度',width: '80'},{prop: 'type',label: '类型',width: '80'},{prop: 'last_comment',label: '最新进展',width: '800'}],
       dsada: ''
     }
   },
@@ -39,12 +39,11 @@ export default {
   },
   methods: {
     getProjectList(status = this.status, sorters = this.sorters, currentPage = this.currentPage) { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
-      // 
       // http://192.168.43.146:8080/fish_boom/proj/listProj
-      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/project/project_list.json', {
+      this.$ajax.get('proj/list', {
         params: {
           start: (currentPage - 1) * 20,
-          limit: 20,
+          size: 20,
           sorters: sorters,
           status: status
         }
@@ -76,7 +75,8 @@ export default {
       this.getProjectList();
     },
     selectProject(row, column, event) { // 表格数据被点击，切换为详细项目信息
-      this.$router.push('/DetailProject/' + row.project_id + '/projectPreview');
+      console.log('选中项目行之后，row的值为',row);
+      this.$router.push('/DetailProject/' + row.id + '/projectPreview');
     }
   }
 }

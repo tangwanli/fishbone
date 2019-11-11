@@ -10,19 +10,23 @@
           <el-menu-item index="/task"><i class="el-icon-s-order"></i>任务<i @click="controlAddTask" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
           <el-menu-item index="/project"><i class="el-icon-s-cooperation"></i>项目<i @click="controlAddProject" class="el-icon-plus el-icon--right add-btn"></i></el-menu-item>
           <el-menu-item index="/schedule"><i class="el-icon-date"></i>日程</el-menu-item>
+          <el-menu-item index="/register"><i class="el-icon-coordinate"></i>注册</el-menu-item>
         </el-menu>
         <section v-if="addTaskBoxVisible">
-          <addTaskBox :addTaskBoxVisible="addTaskBoxVisible" @closeAddTask="closeAddTask"></addTaskBox>
+          <addTaskBox @reloadHome="reloadHome" :addTaskBoxVisible="addTaskBoxVisible" @closeAddTask="closeAddTask"></addTaskBox>
         </section>
         <section v-if="addProjectBoxVisible">
-          <addProjectBox :addProjectBoxVisible="addProjectBoxVisible" @closeAddProject="closeAddProject"></addProjectBox>
+          <addProjectBox @reloadHome="reloadHome" :addProjectBoxVisible="addProjectBoxVisible" @closeAddProject="closeAddProject"></addProjectBox>
         </section>
         <el-divider class="menu-divider"></el-divider>
       </el-main>
 
 
       <el-footer>
-        <el-avatar>{{userName}}</el-avatar>
+        <el-row>
+          <el-col :span="12"><el-avatar>{{userName}}</el-avatar></el-col>
+          <el-col :span="12"><i @click="logout" class="el-icon-switch-button logout"></i></el-col>
+        </el-row>
       </el-footer>
     </el-aside>
 </template>
@@ -59,7 +63,15 @@ export default {
     },
     closeAddProject() { // 关闭添加项目的dialog
       this.addProjectBoxVisible = false;
-    }
+    },
+    logout() { // 注销
+      console.log('进入logout');
+      this.$emit('logOut');
+    },
+    reloadHome () {
+     this.$emit('reloadHome2');
+     console.log('进入reload2');
+   }
   },
   components: {
     addTaskBox,
@@ -96,6 +108,7 @@ export default {
     height: 40px;
     line-height: 40px;
     text-align: left;
+    transition: 1s;
 }
 .add-btn {       /* 两个加号按钮 */
   position: absolute;
@@ -149,5 +162,21 @@ export default {
   font-size: 14px;
   text-align: center;
   background: rgb(103,202,255);
+}
+.logout {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  margin: 13px 0 0 20px;
+  font-size: 14px;
+  text-align: center;
+  background: rgb(103,202,255);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 1s;
+}
+.logout:hover {
+  color: red;
+  box-shadow: 0 2px 12px 0 red;
 }
 </style>

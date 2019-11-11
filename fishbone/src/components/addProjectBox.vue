@@ -89,7 +89,7 @@ export default {
         plan_start_date: new Date(),
         plan_end_date: new Date(),
         priorityList: ['低','普通','高','非常重要'],
-        priorityInitValue: '', // 项目优先值处的默认值
+        priorityInitValue: '普通', // 项目优先值处的默认值
         dsa: 'dsa',
     }
   },
@@ -173,18 +173,21 @@ export default {
         if (manager_name[0].name == '未设置') {
             alert('请添加项目经理，不然谁管啊！！！！！');
         } else {
-            this.$ajax.post('http://172.26.142.82:8080/fish_boom/task/delete/', {
-                ff: manager_name,
+            this.$ajax.post('proj/add', {
+                pm: manager_name[0],
+                partner: [],
                 cc: cc_members[0].name == '未设置' ? [] : cc_members,
                 endDate: this.formatDate(plan_end_date),
                 startDate: this.formatDate(plan_start_date),
                 priority: priority,
                 content: content,
-                name: title
+                name: title,
+                type: '瀑布'
             }).then((res) => {
               console.log('添加成功返回');
             });
             this.closeDialog();
+            this.$emit('reloadHome');
         }
       }
     },

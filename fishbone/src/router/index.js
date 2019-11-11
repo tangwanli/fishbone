@@ -12,6 +12,7 @@ import projectChart from '@/components/main/projectChart'
 import projectCalendar from '@/components/main/projectCalendar'
 import projectTaskList from '@/components/main/projectTaskList'
 import schedule from '@/components/schedule'
+import register from '@/components/register'
 
 
 
@@ -40,6 +41,11 @@ export default new Router({
         name: 'DetailTask',
         component: DetailTask
       }]
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: register,
     },
     {
       path: '/task',

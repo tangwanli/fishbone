@@ -8,7 +8,7 @@
         </el-table>
       </el-col>
 
-      <el-col><router-view v-if="isRouterAlive"/></el-col>
+      <el-col><router-view @reloadHome="reloadHome" v-if="isRouterAlive"/></el-col>
     </el-row>
   </section>
 </template>
@@ -21,7 +21,7 @@ export default {
       msg: 'Welcome to Your Vue.js App',
       projectTaskList: [], // 核心还是这个变量，来显示所以的数据
       url: '',
-      tableCol: [{prop: 'task_name',label: '任务名',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'manager.nick_name',label: '负责人',width: '80'},{prop: 'plan_start_date',label: '开始',width: '100'},{prop: 'plan_end_date',label: '结束',width: '100'},{prop: 'priority',label: '优先级',width: '80'},{prop: 'progress_percent',label: '进度',width: '80'},{prop: 'content',label: '内容简介',width: '800'}],
+      tableCol: [{prop: 'name',label: '任务名',width: '280',fixed: true},{prop: 'code',label: '编号',width: '80'},{prop: 'ff[0].name',label: '负责人',width: '80'},{prop: 'startDate',label: '开始',width: '100'},{prop: 'endDate',label: '结束',width: '100'},{prop: 'priority',label: '优先级',width: '80'},{prop: 'percent',label: '进度',width: '80'},{prop: 'content',label: '内容简介',width: '800'}],
       isRouterAlive: true,
     }
   },
@@ -32,8 +32,11 @@ export default {
   },
   methods: {
     getProjectTaskList() { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
-      this.url = 'http://rap2api.taobao.org/app/mock/232839/task/task_list.json' + this.$route.params.proId;
-      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', { // 这里是应该用this.url的
+      this.url = 'proj/listTask';
+      this.$ajax.get(this.url, { // 这里是应该用this.url的
+        params: {
+          pid: this.$route.params.proId
+        }
       }).then((res) => {
         let resData = res.data;
         sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
@@ -43,12 +46,16 @@ export default {
     },
     selectTask(row, column, event) { // 表格数据被点击，切换为详细任务信息
       this.reload();
-      this.$router.push('/DetailProject/' + this.$route.params.proId + '/projectTaskList/' + row.task_id);
+      this.$router.push('/DetailProject/' + this.$route.params.proId + '/projectTaskList/' + row.id);
     },
     reload () {
      this.isRouterAlive = false;
      this.$nextTick(() => (this.isRouterAlive = true));
-   }
+    },
+    reloadHome () {
+      this.$emit('reloadHome2');
+      console.log('进入reload2');
+    }
   }
 }
 </script>

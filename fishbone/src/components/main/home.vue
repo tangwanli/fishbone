@@ -22,14 +22,16 @@
             <span>{{item.percent}}</span>
           </div>
           <div class="second-line">
-            <span class="baseColor">{{item.manager.nick_name}}</span>
-            <span :class="isOverDue(item.plan_end_date) ? 'baseColor' : 'redColor'">{{item.plan_end_date}}</span>
+            <span class="baseColor">{{item.pm.name}}</span>
+            <span :class="isOverDue(item.endDate) ? 'baseColor' : 'redColor'">{{item.endDate}}</span>
           </div>
         </el-menu-item>
       </el-menu>
     </el-col>
     
-    <router-view @reloadHome="reloadHome" v-if="isRouterAlive"/>
+    <transition name="task" mode="out-in">
+      <router-view @reloadHome="reloadHome" v-if="isRouterAlive"/>
+    </transition>
   </el-row>
 </template>
 
@@ -49,7 +51,7 @@ export default {
   created() {
     // 获取任务列表
     // http://172.26.142.82:8080/fish_boom/getCaptcha
-    this.$ajax.get('http://172.26.142.82:8080/fish_boom/task/list', {
+    this.$ajax.get('task/list', {
       params: {
         start: 0,
         size: 30,
@@ -64,7 +66,7 @@ export default {
       this.taskList = resData.list;
     });
     // 获取项目列表
-    this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/project/project_list.json', {
+    this.$ajax.get('proj/list', {
       params: {
         sorters: {"column":"last_up_date","direction":"desc"},
         size: 20,
@@ -104,6 +106,31 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/* 组件过渡动画 */
+.task-leave {
+  opacity: 1;
+  transform: translateX(0px);
+}
+.task-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+.task-leave-active {
+  transition: 1s;
+}
+.task-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.task-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+.task-enter-active {
+  transition: 1s;
+}
+
+/* 其余 */
 .home > .el-col {
   margin: 0 15px 0 15px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);

@@ -86,7 +86,7 @@ export default {
       // }
       // http://172.26.142.82:8080/fish_boom/getCaptcha
       if (this.aimPosition == 'manager' || this.aimPosition == 'cc_member' || this.aimPosition == 'partner') { // 点开的为抄送人。这里这个partner为项目页独有的
-        this.$ajax.get('http://172.26.142.82:8080/fish_boom/user/list', {
+        this.$ajax.get('user/list', {
           params: {
             size: 2000,
             start: 0
@@ -98,7 +98,7 @@ export default {
         });
       }
       if (this.aimPosition == 'project') { // 点开的为项目\
-        this.$ajax.get('http://172.26.142.82:8080/fish_boom/proj/list', { 
+        this.$ajax.get('proj/list', { 
           params: {
             sorters: {"column":"last_up_date","direction":"desc"},
             size: 200,
@@ -128,7 +128,7 @@ export default {
         //   });
         // }
         if (this.aimPosition == 'manager' || this.aimPosition == 'cc_member' || this.aimPosition == 'partner') { // 点开的为负责人、抄送人或者普通成员
-          this.$ajax.get('http://172.26.142.82:8080/fish_boom/user/listByName', { 
+          this.$ajax.get('user/listByName', { 
             params: {
               name: this.input
             }
@@ -138,7 +138,7 @@ export default {
           });
         }
         if (this.aimPosition == 'project') { // 点开的为项目
-          this.$ajax.get('http://172.26.142.82:8080/fish_boom/proj/listByName', { 
+          this.$ajax.get('proj/listByName', { 
             params: {
               name: this.input
             }

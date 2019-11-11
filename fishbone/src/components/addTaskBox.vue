@@ -167,11 +167,11 @@ export default {
           priority = this.priorityInitValue,
           content = this.content,
           title = this.title,
-          type = this.typeInitValue == '普通任务' ? 'ordinary' : 'batch';
+          type = this.typeInitValue == '普通任务' ? '普通' : '批量';
       if (new Date(plan_start_date) > new Date(plan_end_date)) {
-        alert('开始时间必须在结束时间之前');
+        alert('开始时间必须在结束时间之前');1
       } else {
-        this.$ajax.post('http://172.26.142.82:8080/fish_boom/task/add', {
+        this.$ajax.post('task/add', {
           ff: manager_name[0].name == '未设置' ? [] : manager_name,
           cc: cc_members[0].name == '未设置' ? [] : cc_members,
           project: project_name,
@@ -185,6 +185,7 @@ export default {
           console.log('添加成功返回');
         });
         this.closeDialog();
+        this.$emit('reloadHome');
       }
     },
     closeDialog() { // 关闭dialog

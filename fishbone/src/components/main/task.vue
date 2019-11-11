@@ -35,7 +35,7 @@
             </el-menu-item>
           </el-menu>
         </el-col>
-        <el-col :span="18"><router-view v-if="isRouterAlive"/></el-col>
+        <el-col :span="18"><router-view @reloadHome="reloadHome" v-if="isRouterAlive"/></el-col>
       </el-row>
     </el-main>
   </el-container>
@@ -64,10 +64,10 @@ export default {
   },
   methods: {
     getTaskList(task_type = this.task_type, status = this.status, sorters = this.sorters) { // 所有的获取任务列表的请求。这里用了一个函数形参默认值
-      this.$ajax.get('http://rap2api.taobao.org/app/mock/232839/task/task_list.json', {
+      this.$ajax.get('task/list', {
         params: {
           start: 0,
-          limit: 30,
+          size: 30,
           sorters: sorters,
           task_type: task_type,
           status: status
@@ -123,7 +123,11 @@ export default {
     reload () {
      this.isRouterAlive = false;
      this.$nextTick(() => (this.isRouterAlive = true));
-   }
+    },
+    reloadHome () {
+      this.$emit('reloadHome2');
+      console.log('进入reload2');
+    }
   }
 }
 </script>
