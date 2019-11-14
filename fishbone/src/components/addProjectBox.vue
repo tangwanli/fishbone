@@ -184,10 +184,23 @@ export default {
                 name: title,
                 type: '瀑布'
             }).then((res) => {
-              console.log('添加成功返回');
+              console.log('添加成功返回',res);
+              this.$ajax.get('proj/list', {
+                params: {
+                  start: 1,
+                  size: 20,
+                  sorters: {"column":"last_Update","direction":"desc"},
+                  status: 'all'
+                }
+              }).then((res) => {
+                console.log('这里是获取项目列表的所有返回值',res);
+                let resData = res.data;
+                sessionStorage.setItem('projectResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
+                this.closeDialog();
+                this.$emit('reloadHome');
+              });
             });
-            this.closeDialog();
-            this.$emit('reloadHome');
+            
         }
       }
     },

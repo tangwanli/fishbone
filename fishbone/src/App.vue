@@ -8,7 +8,8 @@
     <el-main v-if="isLogin">
       <transition name="main" mode='out-in'>
         <router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2"/>
-      </transition></el-main> 
+      </transition>
+    </el-main> 
     <el-main v-if="isLogin ? false : true" style="padding:0;"><login @loginSuccess="loginSuccess"></login></el-main>
   </el-container>
 </template>
@@ -76,7 +77,7 @@ export default {
   transform: translateY(-300px);
 }
 .main-leave-active {
-  transition: 1s;
+  transition: 0.7s;
 }
 .main-enter {
   transform: translateY(300px);
@@ -87,7 +88,7 @@ export default {
   transform: translateY(0);
 }
 .main-enter-active {
-  transition: 1s;
+  transition: 0.7s;
 }
 
 /* 其余 */
@@ -98,8 +99,8 @@ export default {
 /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/  
 ::-webkit-scrollbar  
 {  
-    width: 10px;  /*滚动条宽度*/
-    height: 10px;  /*滚动条高度*/
+    width: 5px;  /*滚动条宽度*/
+    height: 5px;  /*滚动条高度*/
 }  
   
 /*定义滚动条轨道 内阴影+圆角*/  
@@ -115,7 +116,7 @@ export default {
 {  
     border-radius: 10px;  /*滚动条的圆角*/
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
-    background-color: gray;  /*滚动条的背景颜色*/
+    background-color: rgba(211,211,211,0.1);  /*滚动条的背景颜色*/
 }  
 </style>
   

@@ -2,7 +2,7 @@
   <section id="register">
     <el-row>
       <el-col :span="7">
-        <el-upload @change="demo" action="https://jsonplaceholder.typicode.com/posts/" ref="upload" multiple :on-change="handleChange" :file-list="fileList" :auto-upload="false">
+        <el-upload @change="demo" :with-credentials="true" action="http://172.26.142.103:8080/fish_boom/user/addByExcel" ref="upload" multiple :on-change="handleChange" :file-list="fileList" :auto-upload="false">
             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
             <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">点击上传到服务器</el-button>
             <div slot="tip" class="el-upload__tip">只能上传excel文件</div>

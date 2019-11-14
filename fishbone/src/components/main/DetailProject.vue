@@ -12,7 +12,9 @@
     </el-header>
 
     <el-main>
-      <router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2" :projectInfo="projectInfo"/>
+      <transition name="project" mode="out-in">
+        <router-view v-if="isRouterAliveTop" @reloadHome2="reloadHome2" :projectInfo="projectInfo"/>
+      </transition>
     </el-main>
   </el-container>
 </template>
@@ -77,6 +79,27 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/* 组件过渡动画 */
+.project-leave {
+  opacity: 1;
+}
+.project-leave-to {
+  opacity: 0;
+}
+.project-leave-active {
+  transition: 0.7s;
+}
+.project-enter {
+  opacity: 0;
+}
+.project-enter-to {
+  opacity: 1;
+}
+.project-enter-active {
+  transition: 0.7s;
+}
+
+/* 其余 */
 #DetailProject {
   margin: -20px;
 }

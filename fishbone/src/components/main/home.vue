@@ -2,7 +2,7 @@
   <el-row class="home">
     <!-- 任务 -->
     <el-col :span="6" class="home-task-list">
-      <header>待办 [ {{taskCount}} ]</header>
+      <header>任务 [ {{taskCount}} ]</header>
       <el-menu background-color="#fff" text-color="#2c3e50" :router="true">
         <el-menu-item @click="reload" :index="'/home/' + item.id" v-for="item in taskList">
           <div class="first-line">
@@ -16,7 +16,7 @@
     <el-col :span="6" class="home-project-list">
       <header>项目 [ {{projectCount}} ]</header>
       <el-menu background-color="#fff" text-color="#2c3e50" :router="true">
-        <el-menu-item  :index="'/project'" v-for="item in projectList">
+        <el-menu-item  :index="'/DetailProject/' + item.id + '/projectPreview'" v-for="item in projectList">
           <div class="first-line">
             <span>{{item.name}}</span>
             <span>{{item.percent}}</span>
@@ -24,6 +24,22 @@
           <div class="second-line">
             <span class="baseColor">{{item.pm.name}}</span>
             <span :class="isOverDue(item.endDate) ? 'baseColor' : 'redColor'">{{item.endDate}}</span>
+          </div>
+        </el-menu-item>
+      </el-menu>
+    </el-col>
+    <!-- 动态 -->
+    <el-col :span="6" class="home-project-list">
+      <header>动态 [ {{dynamicCount}} ]</header>
+      <el-menu background-color="#fff" text-color="#2c3e50" :router="true" style="height: 640px">
+        <el-menu-item  :index="dynamicRout(item)" v-for="item in dynamicList">
+          <div class="first-line">
+            <span>{{item.type}}: {{item.subject_name}}</span>
+            <span>{{item.creatTime}}</span>
+          </div>
+          <div class="second-line">
+            <span class="baseColor">{{item.creator}}: {{item.content}}</span>
+            <span></span>
           </div>
         </el-menu-item>
       </el-menu>
@@ -44,6 +60,8 @@ export default {
       taskList: [],
       projectCount: 1,
       projectList: [],
+      dynamicCount: 1,
+      dynamicList: [],
       isRouterAlive: true,
       isRouterAlive2: true
     }
@@ -53,11 +71,11 @@ export default {
     // http://172.26.142.82:8080/fish_boom/getCaptcha
     this.$ajax.get('task/list', {
       params: {
-        start: 0,
+        start: 1,
         size: 30,
-        sorters: {"column":"last_up_date","direction":"desc"},
-        task_type: 1,
-        status: "running"
+        sorters: {"column":"last_Update","direction":"desc"},
+        task_type: 0,
+        status: "all"
       }
     }).then((res) => {
       let resData = res.data;
@@ -68,16 +86,23 @@ export default {
     // 获取项目列表
     this.$ajax.get('proj/list', {
       params: {
-        sorters: {"column":"last_up_date","direction":"desc"},
+        sorters: {"column":"last_Update","direction":"desc"},
         size: 20,
-        start: 0,
+        start: 1,
         status: 'all'
       }
     }).then((res) => {
       let resData = res.data;
-      sessionStorage.setItem('projectResList',resData);
+      sessionStorage.setItem('projectResList',JSON.stringify(resData));
       this.projectCount = resData.count;
       this.projectList = resData.list;
+    });
+    // 获取动态
+    this.$ajax.get('opera/list', {
+    }).then((res) => {
+      let resData = res.data;
+      this.dynamicCount = resData.count;
+      this.dynamicList = resData.list;
     });
   },
   methods: {
@@ -89,6 +114,10 @@ export default {
         state = false;
       }
       return state;
+    },
+    dynamicRout(item) { // 判断对应的动态是任务的还是项目的
+      let rout = (item.pid == null) ? ('/home/' + item.tid) : ('/DetailProject/' + item.pid + '/projectPreview');
+      return rout;
     },
     reload () {
       console.log(this.isRouterAlive);
@@ -116,7 +145,7 @@ export default {
   transform: translateX(100%);
 }
 .task-leave-active {
-  transition: 1s;
+  transition: 0.7s;
 }
 .task-enter {
   transform: translateX(100%);
@@ -127,7 +156,7 @@ export default {
   transform: translateX(0);
 }
 .task-enter-active {
-  transition: 1s;
+  transition: 0.7s;
 }
 
 /* 其余 */
@@ -157,7 +186,7 @@ header {
   height: 640px;
 }
 .home-project-list .el-menu {
-  height: 300px;
+  height: 500px;
 }
 .el-menu-item {
   position: relative;

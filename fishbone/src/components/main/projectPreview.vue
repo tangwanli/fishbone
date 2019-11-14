@@ -130,7 +130,7 @@ export default {
         console.log('数据初始化完了');
     },
     initComment() { // 初始化评论
-      this.$ajax.get('opera/list', {
+      this.$ajax.get('opera/listById', {
         params: {
           id: this.projectId,
           type: 'project'
@@ -152,13 +152,13 @@ export default {
         let resDate = this.formatDate(new Date(date));
         this.$ajax.put(this.url, { // 修改任务负责人
             startDate: resDate
-        });
+        }).then(() => {this.initComment();});
     },
     changeEndDate(date) { // 修改任务的结束日期
         let resDate = this.formatDate(new Date(date));
         this.$ajax.put(this.url, {
             endDate: resDate
-        });
+        }).then(() => {this.initComment();});
     },
     formatDate(date) {
         let year = date.getFullYear(),
@@ -177,19 +177,19 @@ export default {
           this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
             pm: this.managerName[0].name == '未设置' ? [] : this.managerName[0]
-          });
+          }).then(() => {this.initComment();});
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人
           this.ccMembers = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
             cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
-          });
+          }).then(() => {this.initComment();});
       }
       if (aimPosition == 'partner') { 
           this.partners = tagArr.length ? tagArr : [{name:'未设置',id:'1221'}];
           this.$ajax.put(this.url, { // 修改任务负责人
             partner: this.partners[0].name == '未设置' ? [] : this.partners
-          });
+          }).then(() => {this.initComment();});
       }
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
@@ -236,7 +236,7 @@ export default {
       }
       this.$ajax.put(this.url, { // 修改任务负责人
             cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
-      });
+      }).then(() => {this.initComment();});
     },
     closeTag2(tagName) { // 关闭标签，触发的事件
       let index1 = 0;
@@ -251,24 +251,23 @@ export default {
       }
       this.$ajax.put(this.url, { // 修改任务负责人
             partner: this.partners[0].name == '未设置' ? [] : this.partners
-      });
-      
+      }).then(() => {this.initComment();});
     },
     changeContent() { // 修改项目描述
       this.$ajax.put(this.url, {
         content: this.content
-      });
+      }).then(() => {this.initComment();});
       this.isDisableModifyContent = true;
     },
     changePriority(value) { // 修改任务优先级
       this.$ajax.put(this.url, {
         priority: value
-      });
+      }).then(() => {this.initComment();});
     },
     subComment() { // 提交评论
       if (this.commentContent != '') {
         let temp = {
-            nick_name: 'this is the username',       
+            nick_name: sessionStorage.getItem('userName'),       
             content: this.commentContent,
             comment_times: this.formatDate(new Date())
         };
@@ -277,7 +276,7 @@ export default {
             subject_id: this.projectId,
             content: this.commentContent,
             type: 'project'
-        });
+        }).then(() => {this.initComment();});
         this.commentContent = '';
       }
     }

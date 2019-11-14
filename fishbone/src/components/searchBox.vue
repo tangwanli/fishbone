@@ -100,7 +100,7 @@ export default {
       if (this.aimPosition == 'project') { // 点开的为项目\
         this.$ajax.get('proj/list', { 
           params: {
-            sorters: {"column":"last_up_date","direction":"desc"},
+            sorters: {"column":"last_Update","direction":"desc"},
             size: 200,
             start: 0,
             status: 'all'

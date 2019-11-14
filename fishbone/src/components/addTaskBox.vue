@@ -70,7 +70,7 @@ export default {
     return {
         msg: 'show me this',
         typeList: ['普通任务','批量任务'],
-        typeInitValue: '', 
+        typeInitValue: '普通任务', 
         title: '',
         content: '', // 任务的主内容
         managerName: [{name:'未设置',id:'12'}], // 这三个是几个可以弹出search-box的地方的默认值
@@ -83,7 +83,7 @@ export default {
         plan_start_date: new Date(),
         plan_end_date: new Date(),
         priorityList: ['普通','重要','紧急','重要紧急'],
-        priorityInitValue: '', // 任务优先值处的默认值
+        priorityInitValue: '普通', // 任务优先值处的默认值
         dsa: 'dsa',
     }
   },
@@ -161,7 +161,7 @@ export default {
     savaTaskAdd(){
       let manager_name = this.managerName,
           cc_members = this.ccMembers,
-          project_name = this.projectName[0].name == '未设置' ? [] : this.projectName[0],
+          project_name = this.projectName[0].name == '未设置' ? null : this.projectName[0],
           plan_end_date = this.plan_end_date,
           plan_start_date = this.plan_start_date,
           priority = this.priorityInitValue,
@@ -183,9 +183,21 @@ export default {
           type: type
         }).then((res) => {
           console.log('添加成功返回');
+          this.$ajax.get('task/list', {
+            params: {
+              start: 0,
+              size: 30,
+              sorters: {"column":"last_Update","direction":"desc"},
+              task_type: 1,
+              status: 'running'
+            }
+          }).then((res) => {
+            let resData = res.data;
+            sessionStorage.setItem('taskResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
+            this.closeDialog();
+            this.$emit('reloadHome');
+          });
         });
-        this.closeDialog();
-        this.$emit('reloadHome');
       }
     },
     closeDialog() { // 关闭dialog

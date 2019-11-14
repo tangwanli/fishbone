@@ -35,7 +35,11 @@
             </el-menu-item>
           </el-menu>
         </el-col>
-        <el-col :span="18"><router-view @reloadHome="reloadHome" v-if="isRouterAlive"/></el-col>
+        <el-col :span="18">
+          <transition name="task" mode="out-in">
+            <router-view @reloadHome="reloadHome" v-if="isRouterAlive"/>
+          </transition>
+        </el-col>
       </el-row>
     </el-main>
   </el-container>
@@ -54,7 +58,7 @@ export default {
       taskSorters: '按最后更新时间',
       task_type: 1, // 当前任务的类型
       status: 'running', // 当前任务状态
-      sorters: {"column":"last_up_date","direction":"desc"}, // 当前任务的排序方式
+      sorters: {"column":"last_Update","direction":"desc"}, // 当前任务的排序方式
       taskList: [],
       isRouterAlive: true
     }
@@ -105,7 +109,7 @@ export default {
       if (btn.btnName == "抄送我的") {this.task_type = 3;}
       if (btn.btnName == "全部") {this.task_type = 0;}
       this.status = 'running'; // 点了头部按钮之后，需要把任务的状态重置和任务排序方式清空
-      this.sorters = {"column":"last_up_date","direction":"desc"};
+      this.sorters = {"column":"last_Update","direction":"desc"};
       this.getTaskList();
     },
     changeTaskStatus(taskStatus) { // 修改任务状态
@@ -115,8 +119,8 @@ export default {
       this.getTaskList();
     },
     changeTaskSorters(taskSorters) { // 修改任务状态
-      if (taskSorters == '按最后更新时间') {this.sorters = {"column":"last_up_date","direction":"desc"}}
-      if (taskSorters == '按到期时间') {this.sorters = {"column":"plan_end_date","direction":"desc"}}
+      if (taskSorters == '按最后更新时间') {this.sorters = {"column":"last_Update","direction":"desc"}}
+      if (taskSorters == '按到期时间') {this.sorters = {"column":"endDate","direction":"desc"}}
       if (taskSorters == '按分级') {this.sorters = {"column":"priority","direction":"desc"}}
       this.getTaskList();
     },
@@ -134,6 +138,31 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/* 组件过渡动画 */
+.task-leave {
+  opacity: 1;
+  transform: translateX(0px);
+}
+.task-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+.task-leave-active {
+  transition: 0.7s;
+}
+.task-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.task-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+.task-enter-active {
+  transition: 0.7s;
+}
+
+/* 其余 */
 #task {
   margin: -20px;
 }

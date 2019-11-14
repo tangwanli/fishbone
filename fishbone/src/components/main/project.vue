@@ -11,7 +11,7 @@
     <el-main class="main-table">
       <el-table @row-click="selectProject" :data="projectList" stripe highlight-current-row height="590"> 
           <el-table-column :fixed="true" type="index" label="序号" width="50"></el-table-column>
-          <el-table-column :fixed="col.fixed" v-for="col in tableCol" :label="col.label" :prop="col.prop" :min-width="col.width" sortable="true"></el-table-column>
+          <el-table-column :fixed="col.fixed" v-for="col in tableCol" :label="col.label" :prop="col.prop" :min-width="col.width"></el-table-column>
       </el-table>
       <el-pagination @current-change="changePage" :current-page="currentPage" layout="jumper,prev,pager, next,total" :total="count" :page-size="20"></el-pagination>
     </el-main>
@@ -26,7 +26,7 @@ export default {
       msg: '开始游戏',
       btnValue: [{btnName: '进行中', isSelect: true},{btnName: '完成', isSelect: false},{btnName: '全部', isSelect: false}], // 上面的几个按钮的名字
       status: 'running',
-      sorters: {"column":"last_up_date","direction":"desc"},
+      sorters: {"column":"last_Update","direction":"desc"},
       currentPage: 1,
       projectList: [],
       count: 100, // 所有数据的总数
@@ -42,16 +42,17 @@ export default {
       // http://192.168.43.146:8080/fish_boom/proj/listProj
       this.$ajax.get('proj/list', {
         params: {
-          start: (currentPage - 1) * 20,
+          start: currentPage,
           size: 20,
           sorters: sorters,
           status: status
         }
       }).then((res) => {
+        console.log('这里是获取项目列表的所有返回值',res);
         let resData = res.data;
         sessionStorage.setItem('projectResList',JSON.stringify(resData)); // 弄成json字符串存数据到sessionStorage里面
         this.projectList = resData.list;
-        this.count = resData.count;
+        this.count = resData.total;
       });
     },
     btnColorChange(btn) { // 改变btn颜色

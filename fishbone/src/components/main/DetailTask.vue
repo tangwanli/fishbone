@@ -62,7 +62,7 @@
             <span class="baseColor">（{{taskStatus}}）</span>
             <br>
             <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">{{managerName[0].name}}</span>
-            <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{plan_end_date}}</span>
+            <span :class="taskStatus == 'finish' ? 'redColor' : 'baseColor'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{formatDate(new Date(plan_end_date))}}</span>
           </el-col>
           <el-col :span="3">
             <el-button @click="changeTaskStatus" v-if="taskStatus == '等待'" type="primary" round size="mini">开始解决</el-button>
@@ -93,7 +93,7 @@
         </el-tab-pane>
         <el-tab-pane label="操作记录" name="second">这个操作记录已经合在上面任务记录里面了！！！！大佬们看着玩吧！！！！</el-tab-pane>
       </el-tabs>
-      <el-input @blur="subComment" class="task-com" size="medium" type="text" placeholder="请大佬写下你的评论吧！" v-model="commentContent" clearable show-word-limit maxlength="1000"></el-input>
+      <el-input @blur="subComment" class="task-com" size="medium" type="text" placeholder="请大佬写下你的评论吧！\ndsad" v-model="commentContent" clearable show-word-limit maxlength="1000"></el-input>
     </el-footer>
   </el-container>
 </template>
@@ -163,7 +163,7 @@ export default {
     },
     initComment() { // 初始化评论
     // http://172.26.142.82:8080/fish_boom/getCaptcha
-      this.$ajax.get('opera/list', {
+      this.$ajax.get('opera/listById', {
         params: {
           id: this.task_id,
           type: 'task'
@@ -186,19 +186,19 @@ export default {
           this.managerName = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
             ff: this.managerName[0].name == '未设置' ? [] : this.managerName
-          });
+          }).then(() => {this.initComment();});
       }
       if (aimPosition == 'cc_member') { // 点开的为抄送人\
           this.ccMembers = tagArr.length ? tagArr : [{name:'未设置',id:'12'}];
           this.$ajax.put(this.url, { // 修改任务负责人
             cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
-          });
+          }).then(() => {this.initComment();});
       }
       if (aimPosition == 'project') { 
           this.projectName = tagArr.length ? tagArr : [{name:'未设置',id:'1221'}];
           this.$ajax.put(this.url, { // 修改任务负责人
             project: this.projectName[0].name == '未设置' ? [] : this.projectName[0]
-          });
+          }).then(() => {this.initComment();});
       }
     },
     saveTagArr() { // 把当前任务的标签，存在数组里面
@@ -243,7 +243,7 @@ export default {
       }
       this.$ajax.put(this.url, { // 修改任务负责人
             ff: this.managerName[0].name == '未设置' ? [] : this.managerName
-      });
+      }).then(() => {this.initComment();});
     },
     closeCcTag(tagName) { // 关闭标签，触发的事件
       let index1 = 0;
@@ -258,19 +258,19 @@ export default {
       }
       this.$ajax.put(this.url, { // 修改任务负责人
             cc: this.ccMembers[0].name == '未设置' ? [] : this.ccMembers
-      });
+      }).then(() => {this.initComment();});
     },
     changeStartDate(date) { // 修改任务的开始日期
       let resDate = this.formatDate(new Date(date));
       this.$ajax.put(this.url, { // 修改任务负责人
         startDate: resDate
-      });
+      }).then(() => {this.initComment();});
     },
     changeEndDate(date) { // 修改任务的结束日期
       let resDate = this.formatDate(new Date(date));
       this.$ajax.put(this.url, {
         endDate: resDate
-      });
+      }).then(() => {this.initComment();});
     },
     formatDate(date) {
       let year = date.getFullYear(),
@@ -287,45 +287,45 @@ export default {
     changePriority(value) { // 修改任务优先级
       this.$ajax.put(this.url, {
         priority: value
-      });
+      }).then(() => {this.initComment();});
     },
     changeContent() { // 修改任务内容
       this.$ajax.put(this.url, {
         content: this.content
-      });
+      }).then(() => {this.initComment();});
       this.isDisableModifyContent = true;
     },
     changeTaskStatus() { // 改变任务的状态，从开始准备到进行中
       this.taskStatus = '进行中';
       this.$ajax.put(this.url, {
         status: '进行中'
-      });
+      }).then(() => {this.initComment();});
     },
     changeTaskProgress(value) { // 改变任务进度
       if (value == '100%') {
         this.taskStatus = '完成';
         this.$ajax.put(this.url, {
           percent: value
-        });
+        }).then(() => {this.initComment();});
       } else {
         this.$ajax.put(this.url, {
           percent: value
-        });
+        }).then(() => {this.initComment();});
       }
     },
     subComment() { // 提交评论
       if (this.commentContent != '') {
         let temp = {
-            nick_name: 'this is the username',       
+            nick_name: sessionStorage.getItem('userName'),       
             content: this.commentContent,
             comment_times: this.formatDate(new Date())
         };
         this.commentArr.push(temp);
-        this.$ajax.put('opera/add', {
+        this.$ajax.post('opera/add', {
             subject_id: this.task_id,
             content: this.commentContent,
             type: 'task'
-        });
+        }).then(() => {this.initComment();});
         this.commentContent = '';
       }
     },

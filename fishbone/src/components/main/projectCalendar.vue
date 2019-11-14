@@ -17,7 +17,11 @@
         </el-calendar>
       </el-col>
 
-      <el-col><router-view @reloadHome="reloadHome" v-if="isRouterAlive"/></el-col>
+      <el-col>
+        <transition name="task" mode="out-in">
+          <router-view @reloadHome="reloadHome" v-if="isRouterAlive"/>
+        </transition>
+      </el-col>
     </el-row>
   </section>
 </template>
@@ -91,11 +95,39 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/* 组件过渡动画 */
+.task-leave {
+  opacity: 1;
+  transform: translateX(0px);
+}
+.task-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+.task-leave-active {
+  transition: 0.7s;
+}
+.task-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.task-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+.task-enter-active {
+  transition: 0.7s;
+}
+
+/* 其余 */
 .is-selected {
     color: #1989FA;
 }
 .el-calendar {
   overflow: hidden;
+}
+.main-calendar .el-calendar .el-row .el-col:nth-of-type(1)~.el-col {
+  color: red;
 }
 .main-calendar .el-calendar .el-row .el-col:nth-of-type(1)~.el-col:hover {
   transition: 1s;
