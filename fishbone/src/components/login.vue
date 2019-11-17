@@ -22,7 +22,7 @@
         </el-col>
         <el-col :span="20">
             <el-button type="primary" :plain="true" size="mini" @click="login">登陆</el-button>
-            <el-button type="primary" :plain="true" size="mini">注册</el-button>
+            <!-- <el-button type="primary" :plain="true" size="mini">注册</el-button> -->
         </el-col>
     </el-row>
   </section>

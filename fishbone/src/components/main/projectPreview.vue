@@ -149,10 +149,15 @@ export default {
       });
     },
     changeStartDate(date) { // 修改任务的开始日期
+      if (new Date(date).getTime() < new Date(this.plan_end_date).getTime()) {
         let resDate = this.formatDate(new Date(date));
         this.$ajax.put(this.url, { // 修改任务负责人
-            startDate: resDate
+          startDate: resDate
         }).then(() => {this.initComment();});
+      } else {
+        this.plan_start_date = this.projectInfo.startDate;
+        alert('开始时间必须小于结束时间');
+      }
     },
     changeEndDate(date) { // 修改任务的结束日期
         let resDate = this.formatDate(new Date(date));
